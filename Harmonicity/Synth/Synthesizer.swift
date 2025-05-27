@@ -11,7 +11,6 @@ import Foundation
 final class Oscillator {
     private(set) var waveform: Waveform
     private(set) var phase: Float = 0.0
-    
     private(set) var frequency: Float = 0.0
     private(set) var velocity: Float = 0.0
     
@@ -51,14 +50,10 @@ final class Synthesizer {
     private let oscillators: [Oscillator]
     
     init() {
-        let sine = Oscillator(waveform: .sine)
-        sine.set(frequency: 440 / 2, velocity: 0.5)
-        
-        let sine1 = Oscillator(waveform: .triangle)
-        sine1.set(frequency: 3 * 440, velocity: 0.5)
         self.oscillators = [
-            sine,
-            sine1
+            Oscillator(waveform: .sine),
+            Oscillator(waveform: .triangle),
+            Oscillator(waveform: .sawtooth)
         ]
     }
     
@@ -120,10 +115,23 @@ final class Synthesizer {
         audioEngine.prepare()
         try audioEngine.start()
     }
+    
+    // TODO: replace to midi action
+    func play(_ action: KeyAction) {
+        let freq = action.note.frequency * Float(action.octave)
+        let velocity: Float = action.isPressed ? 0.5 : 0.0
+        oscillators.forEach {
+            $0.set(frequency: freq, velocity: velocity)
+        }
+    }
 }
 
 fileprivate extension AVAudioEngine {
-    func attachAndConnect(_ node: AVAudioNode, to node2: AVAudioNode, format: AVAudioFormat?) {
+    func attachAndConnect(
+        _ node: AVAudioNode,
+        to node2: AVAudioNode,
+        format: AVAudioFormat?
+    ) {
         attach(node)
         connect(node, to: node2, format: format)
     }

@@ -11,13 +11,13 @@ struct ContentView: View {
     let synth: Synthesizer
     
     var body: some View {
-        VStack {
-            Text("Ready")
+        HStack(spacing: 4) {
+            ForEach(3...5, id: \.self) { octave in
+                KeyboardView(octave: octave) {
+                    synth.play($0)
+                }
+            }
         }
         .padding()
     }
 }
-
-//#Preview {
-//    ContentView()
-//}
