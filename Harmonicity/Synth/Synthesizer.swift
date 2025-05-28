@@ -8,53 +8,20 @@
 import AVFoundation
 import Foundation
 
-final class Oscillator {
-    private(set) var waveform: Waveform
-    private(set) var phase: Float = 0.0
-    private(set) var frequency: Float = 0.0
-    private(set) var velocity: Float = 0.0
-    
-    var sampleRate: Float = 0.0
-    
-    init(waveform: Waveform) {
-        self.waveform = waveform
-    }
-    
-    func set(frequency: Float, velocity: Float) {
-        self.phase = 0
-        self.frequency = frequency
-        self.velocity = velocity
-    }
-    
-    func mute() {
-        set(frequency: 0, velocity: 0)
-    }
-    
-    func nextSample() -> Float {
-        guard sampleRate > 0.0 else {
-            return 0
-        }
-        let result = velocity * waveform.value(phase: phase)
-        let delta = 2.0 * .pi * frequency / sampleRate
-        phase += delta
-        if phase >= 2.0 * .pi {
-            phase -= 2.0 * .pi
-        }
-        return result
-    }
-}
-
 final class Synthesizer {
     private let audioEngine = AVAudioEngine()
     
-    private let oscillators: [Oscillator]
+    private let voice: Voice
     
     init() {
-        self.oscillators = [
-            Oscillator(waveform: .sine),
-            Oscillator(waveform: .triangle),
-            Oscillator(waveform: .sawtooth)
-        ]
+        self.voice = Voice(
+            oscillators: [
+                Oscillator(waveform: .sine),
+//                Oscillator(waveform: .triangle),
+//                Oscillator(waveform: .sawtooth),
+//                Oscillator(waveform: .square)
+            ]
+        )
     }
     
     deinit {
@@ -63,10 +30,7 @@ final class Synthesizer {
         
     func setup() throws {
         let format = audioEngine.outputNode.inputFormat(forBus: 0)
-        // setup oscillators
-        oscillators.forEach {
-            $0.sampleRate = Float(format.sampleRate)
-        }
+        self.voice.sampleRate = Float(format.sampleRate)
         
         guard let inputFormat = AVAudioFormat(
             commonFormat: format.commonFormat,
@@ -84,33 +48,31 @@ final class Synthesizer {
             format: inputFormat
         )
         
-        for oscillator in oscillators {
-            let sourceNode = AVAudioSourceNode { [weak oscillator] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
-                guard let oscillator else {
-                    isSilence.pointee = true
-                    return noErr
-                }
-                let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
-                for frame in 0..<Int(frameCount) {
-                    let sample = oscillator.nextSample()
-                    for buffer in ablPointer {
-                        guard let pointer = buffer.mData?.assumingMemoryBound(to: Float.self) else {
-                            continue
-                        }
-                        pointer[frame] = sample
-                    }
-                }
-                
-                isSilence.pointee = false
+        let sourceNode = AVAudioSourceNode { [weak voice] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
+            guard let voice else {
+                isSilence.pointee = true
                 return noErr
             }
+            let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
+            for frame in 0..<Int(frameCount) {
+                let sample = voice.nextSample()
+                for buffer in ablPointer {
+                    guard let pointer = buffer.mData?.assumingMemoryBound(to: Float.self) else {
+                        continue
+                    }
+                    pointer[frame] = sample
+                }
+            }
             
-            audioEngine.attachAndConnect(
-                sourceNode,
-                to: oscillatorMixer,
-                format: inputFormat
-            )
+            isSilence.pointee = false
+            return noErr
         }
+        
+        audioEngine.attachAndConnect(
+            sourceNode,
+            to: oscillatorMixer,
+            format: inputFormat
+        )
 
         audioEngine.prepare()
         try audioEngine.start()
@@ -118,11 +80,10 @@ final class Synthesizer {
     
     // TODO: replace to midi action
     func play(_ action: KeyAction) {
-        let freq = action.note.frequency * Float(action.octave)
+        let freq = action.note.frequency * Float(1 << action.octave)
+        print("note: \(action.note), freq: \(freq)")
         let velocity: Float = action.isPressed ? 0.5 : 0.0
-        oscillators.forEach {
-            $0.set(frequency: freq, velocity: velocity)
-        }
+        voice.play(frequency: freq, velocity: velocity)
     }
 }
 
