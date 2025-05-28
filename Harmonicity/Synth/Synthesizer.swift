@@ -16,10 +16,10 @@ final class Synthesizer {
     init() {
         self.voice = Voice(
             oscillators: [
-                Oscillator(waveform: .sine),
-//                Oscillator(waveform: .triangle),
+                Oscillator(waveform: .sine, weight: 0.8),
+                Oscillator(waveform: .triangle, weight: 0.6),
 //                Oscillator(waveform: .sawtooth),
-//                Oscillator(waveform: .square)
+                Oscillator(waveform: .square)
             ]
         )
     }
@@ -84,6 +84,28 @@ final class Synthesizer {
         print("note: \(action.note), freq: \(freq)")
         let velocity: Float = action.isPressed ? 0.5 : 0.0
         voice.play(frequency: freq, velocity: velocity)
+    }
+    
+    func play(_ data: NoteData) {
+        guard data.channel == 0 else {
+            return
+        }
+        let velocity = Float(data.velocity) / 127
+        
+        // for single voice: don't mute current note if released another one
+        if velocity == 0 && voice.note != data.note {
+            return
+        }
+        let freq = 440.0 * pow(2.0, (Float(data.note) - 69.0) / 12.0)
+        voice.play(frequency: freq, velocity: velocity)
+        voice.note = data.note
+    }
+    
+    func processMidiEvent(_ event: MidiEvent) {
+        switch event {
+        case .note(let noteData):
+            play(noteData)
+        }
     }
 }
 

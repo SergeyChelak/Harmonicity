@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    let synth: Synthesizer
+    let context: HarmonicityAppContext
     
     var body: some View {
         HStack(spacing: 4) {
             ForEach(3...5, id: \.self) { octave in
                 KeyboardView(octave: octave) {
-                    synth.play($0)
+                    context.synth.play($0)
                 }
             }
         }

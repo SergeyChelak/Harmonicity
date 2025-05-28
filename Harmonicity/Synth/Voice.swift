@@ -27,6 +27,8 @@ final class Voice {
     
     var sampleRate: Float = 0.0
     
+    var note: MIDINote = 0
+    
     init(oscillators: [Oscillator]) {
         self.oscillators = oscillators
     }
