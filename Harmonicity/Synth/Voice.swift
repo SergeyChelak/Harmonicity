@@ -22,11 +22,10 @@ final class Voice {
     private var phase: Float = 0.0
     private var oscillators: [Oscillator]
     
-    private(set) var frequency: Float = 0.0
     private(set) var velocity: Float = 0.0
+    private var delta: Float = 0.0
     
     var sampleRate: Float = 0.0
-
     
     init(oscillators: [Oscillator]) {
         self.oscillators = oscillators
@@ -47,8 +46,7 @@ final class Voice {
             .reduce((0, 0)) { acc, val in
                 (acc.0 + val.0, acc.1 + val.1)
             }
-        
-        let delta = 2.0 * .pi * frequency / sampleRate
+                
         phase += delta
         if phase >= 2.0 * .pi {
             phase -= 2.0 * .pi
@@ -59,8 +57,12 @@ final class Voice {
     
     func play(frequency: Float, velocity: Float) {
         self.phase = 0
-        self.frequency = frequency
         self.velocity = velocity
+        self.delta = 2.0 * .pi * frequency / sampleRate
+    }
+    
+    var isPlaying: Bool {
+        self.velocity > 0.0
     }
 
 }
