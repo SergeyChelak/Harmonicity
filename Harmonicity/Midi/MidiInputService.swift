@@ -119,12 +119,11 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
-                    let data = NoteData(
-                        channel: channel,
+                    let data = MIDINote(
                         note: note,
                         velocity: velocity
                     )
-                    eventPublisher.send(.note(data))
+                    eventPublisher.send(.note(channel, data))
                     if velocity > 0 {
                         print("Note On: Channel \(channel), Note \(note), Velocity \(velocity)")
                     } else {
@@ -141,12 +140,11 @@ final class MidiInputService {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
                     
-                    let data = NoteData(
-                        channel: channel,
+                    let data = MIDINote(
                         note: note,
                         velocity: velocity // force 0?
                     )
-                    eventPublisher.send(.note(data))
+                    eventPublisher.send(.note(channel, data))
                     
                     print("Note Off: Channel \(channel), Note \(note), Velocity \(velocity)")
                     i += 3

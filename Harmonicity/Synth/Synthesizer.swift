@@ -8,6 +8,39 @@
 import AVFoundation
 import Foundation
 
+func composeVoice(sampleRate: Float) -> CoreVoice {
+    let squareOscillator = WaveOscillator(
+        sampleRate: sampleRate,
+        waveForm: SquareWaveForm()
+    )
+    
+    let sineOscillator = WaveOscillator(
+        sampleRate: sampleRate,
+        waveForm: SineWaveForm()
+    )
+    
+    let multiVoice = MultiVoice(oscillators: [
+        squareOscillator,
+        DetunedOscillator(
+            oscillator: sineOscillator,
+            detune: 15
+        ),
+        DetunedOscillator(
+            oscillator: sineOscillator,
+            detune: -15
+        )
+    ])
+    
+//    let envelopeFilter = ADSRFilter(sampleRate: sampleRate)
+    
+    let voiceChain = VoiceChain(voice: multiVoice)
+    voiceChain.chain(LowPassFilter(sampleRate: sampleRate, cutoffFrequency: 10_000))
+//    voiceChain.chain(envelopeFilter)
+    voiceChain.chain(ClipFilter(minimum: -1.0, maximum: 1.0))
+    return voiceChain
+}
+
+
 final class Synthesizer {
     private let audioEngine = AVAudioEngine()
     // TODO: temporary
@@ -21,22 +54,11 @@ final class Synthesizer {
     init() {
         let format = audioEngine.outputNode.inputFormat(forBus: 0)
         let sampleRate = Float(format.sampleRate)
-//        let oscillator = WaveOscillator(
-//            sampleRate: sampleRate,
-//            waveForm: SquareWaveForm()
-//        )
-        let factory = TableOscillatorFactory(
-            sampleRate: sampleRate,
-            tableSize: 64
-        )
-        let oscillator = factory.oscillator(SineWaveForm())
-        self.sampleSource = SimpleVoice(oscillator: oscillator)
+
+        self.sampleSource = composeVoice(sampleRate: sampleRate)
     }
     
     func setup() throws {
-        let format = audioEngine.outputNode.inputFormat(forBus: 0)
-//        self.voice.sampleRate = Float(format.sampleRate)
-                        
         let sourceNode = AVAudioSourceNode { [weak self] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
             guard let voice = self?.sampleSource else {
                 isSilence.pointee = true
@@ -56,15 +78,14 @@ final class Synthesizer {
             isSilence.pointee = false
             return noErr
         }
-        
+        let format = audioEngine.outputNode.inputFormat(forBus: 0)
         guard let inputFormat = AVAudioFormat(
             commonFormat: format.commonFormat,
             sampleRate: format.sampleRate,
             channels: 1,
             interleaved: format.isInterleaved
         ) else {
-//            throw NSError(domain: "Synthesizer", code: -2)
-            return
+            throw NSError(domain: "Synthesizer", code: -2)
         }
         audioEngine.attachAndConnect(
             sourceNode,
@@ -76,28 +97,20 @@ final class Synthesizer {
         try audioEngine.start()
     }
     
-    // TODO: replace to midi action
-//    func play(_ action: KeyAction) {
-//        let freq = action.note.frequency * Float(1 << action.octave)
-//        print("note: \(action.note), freq: \(freq)")
-//        let velocity: Float = action.isPressed ? 0.5 : 0.0
-//        voice.play(frequency: freq, velocity: velocity)
-//    }
-    
-    // TODO: move out this class
-    func play(_ data: NoteData) {
-        guard data.channel == 0 else {
-            return
-        }
+    // TODO: move out this class ------------
+    func play(_ data: MIDINote) {
         self.sampleSource?.play(data)
     }
     
     func processMidiEvent(_ event: MidiEvent) {
         switch event {
-        case .note(let noteData):
-            play(noteData)
+        case .note(let channel, let note):
+            if channel == 0 {
+                play(note)
+            }
         }
     }
+    // TODO: end ----------------------------
 }
 
 fileprivate extension AVAudioEngine {

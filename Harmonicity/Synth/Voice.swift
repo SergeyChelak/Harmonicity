@@ -7,88 +7,68 @@
 
 import Foundation
 
-final class SimpleVoice: CoreVoice {
-    private let oscillator: CoreOscillator
-    private var velocity: Float = 0.0
+final class MultiVoice: CoreVoice {
+    private let oscillators: [CoreOscillator]
+    private(set) var amplitude: Float = 0.0
+    private var note: MIDINoteNumber = 0
     
-    private var note: MIDINote = 0
-    
-    init(oscillator: CoreOscillator) {
-        self.oscillator = oscillator
+    init(oscillators: [CoreOscillator]) {
+        self.oscillators = oscillators
     }
     
-    func play(_ data: NoteData) {
+    func play(_ data: MIDINote) {
         let velocity = Float(data.velocity) / 127
         // don't mute current note if released another one
         if velocity == 0 && note != data.note {
             return
         }
-        self.velocity = velocity
+        self.amplitude = velocity
         self.note = data.note
         let freq = 440.0 * pow(2.0, (Float(data.note) - 69.0) / 12.0)
         print("Voice frequency: \(freq)")
-        oscillator.setFrequency(freq)
+        oscillators.forEach {
+            $0.setFrequency(freq)
+        }
     }
     
     func nextSample() -> Sample {
-        velocity * oscillator.nextSample()
+        amplitude * oscillators
+            .map { $0.nextSample() }
+            .reduce(0.0) { $0 + $1 } / Float(oscillators.count)
     }
 }
 
 
-final class Oscillator {
-    var waveform: Waveform
-    var weight: Float
+final class VoiceChain: CoreVoice {
+    let voice: CoreVoice
     
-    init(waveform: Waveform, weight: Float = 1.0) {
-        self.waveform = waveform
-        self.weight = weight
-    }
-}
-
-
-final class Voice {
-    private var phase: Float = 0.0
-    private var oscillators: [Oscillator]
+    private var processChain: [CoreProcessor] = []
     
-    private(set) var velocity: Float = 0.0
-    private var delta: Float = 0.0
-    
-    var sampleRate: Float = 0.0
-    
-    var note: MIDINote = 0
-    
-    init(oscillators: [Oscillator]) {
-        self.oscillators = oscillators
+    init(voice: CoreVoice) {
+        self.voice = voice
     }
     
-    func nextSample() -> Float {
-        guard sampleRate > 0.0 else {
-            return 0
+    var amplitude: Float {
+        voice.amplitude
+    }
+    
+    func chain(_ processor: CoreProcessor) {
+        processChain.append(processor)
+    }
+    
+    func play(_ data: MIDINote) {
+        processChain.forEach { $0.reset() }
+        voice.play(data)
+    }
+    
+    func nextSample() -> Sample {
+        guard amplitude != 0.0 else {
+            return 0.0
         }
-        
-        let (sum, totalWeight) = oscillators
-            .map {
-                (
-                    $0.weight * velocity * $0.waveform.value(phase: phase),
-                    $0.weight
-                )
-            }
-            .reduce((0, 0)) { acc, val in
-                (acc.0 + val.0, acc.1 + val.1)
-            }
-                
-        phase += delta
-        if phase >= 2.0 * .pi {
-            phase -= 2.0 * .pi
+        var sample = voice.nextSample()
+        for processor in processChain {
+            sample = processor.process(sample)
         }
-        
-        return sum / totalWeight
-    }
-    
-    func play(frequency: Float, velocity: Float) {
-        self.phase = 0
-        self.velocity = velocity
-        self.delta = 2.0 * .pi * frequency / sampleRate
+        return sample
     }
 }

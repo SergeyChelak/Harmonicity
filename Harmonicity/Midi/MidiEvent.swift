@@ -8,15 +8,14 @@
 import Foundation
 
 typealias MIDIChannel = UInt8
-typealias MIDINote = UInt8
+typealias MIDINoteNumber = UInt8
 typealias MIDIVelocity = UInt8
 
 enum MidiEvent {
-    case note(NoteData)
+    case note(MIDIChannel, MIDINote)
 }
 
-struct NoteData {
-    let channel: MIDIChannel
-    let note: MIDINote
+struct MIDINote {
+    let note: MIDINoteNumber
     let velocity: MIDIVelocity
 }
