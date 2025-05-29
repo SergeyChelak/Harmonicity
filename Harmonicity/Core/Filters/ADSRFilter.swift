@@ -70,7 +70,7 @@ final class ADSRFilter: CoreProcessor, CoreMIDINoteHandler {
     }
     
     func process(_ sample: Sample) -> Sample {
-        level * sampleRate
+        level * sample
     }
 
     private var level: Float {

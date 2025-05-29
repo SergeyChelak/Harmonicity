@@ -50,26 +50,11 @@ class MixedVoice: CoreVoice {
         let durationMs = Int(releaseTime * 1000)
         DispatchQueue
             .global(qos: .background)
-            .asyncAfter(deadline: .now() + .seconds(durationMs)) { [weak self] in
+            .asyncAfter(deadline: .now() + .milliseconds(durationMs)) { [weak self] in
                 self?.amplitude = 0
             }
     }
-    
-    func play(_ data: MidiNote) {
-        let velocity = Float(data.velocity) / 127
-        // don't mute current note if released another one
-        if velocity == 0 && note != data.note {
-            return
-        }
-        self.amplitude = velocity
-        self.note = data.note
-        let freq = 440.0 * pow(2.0, (Float(data.note) - 69.0) / 12.0)
-        print("Voice frequency: \(freq)")
-        oscillators.forEach {
-            $0.setFrequency(freq)
-        }
-    }
-    
+        
     func nextSample() -> Sample {
         amplitude * oscillators
             .map { $0.nextSample() }

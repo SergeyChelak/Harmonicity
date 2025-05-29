@@ -25,6 +25,16 @@ struct SquareWaveForm: CoreWaveForm {
     }
 }
 
+struct SawtoothWaveForm: CoreWaveForm {
+    func value(_ x: Float) -> Float {
+        2.0 * x - 1.0
+    }
+    func phaseRange() -> Range<Float> {
+        0..<1.0
+    }
+}
+
+
 /*
  enum Waveform {
      case sine, square, sawtooth, triangle

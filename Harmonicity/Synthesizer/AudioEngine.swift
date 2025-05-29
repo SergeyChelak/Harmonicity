@@ -15,7 +15,7 @@ enum AudioEngineError: Error {
 
 final class AudioEngine {
     private let audioEngine = AVAudioEngine()
-    var sampleSource: CoreVoice?
+    var sampleSource: CoreSampleSource?
         
     deinit {
         audioEngine.stop()

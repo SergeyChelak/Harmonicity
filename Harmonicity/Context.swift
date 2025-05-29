@@ -37,12 +37,13 @@ func composeContext() throws -> Context {
         sampleRate: engine.sampleRate
     )
     
-    let synthesizer = composeSynthesizer(
-        midiCommandCenter: commandCenter,
-        oscillatorFactory: factory,
-        engine: engine
+    let synthesizer = Synthesizer(
+        engine: engine,
+        commandPublisher: commandCenter.publisher,
+        oscillatorFactory: factory
     )
-
+    synthesizer.reconfigure()
+    
     let context = Context(
         engine: engine,
         midiInput: midiInput,

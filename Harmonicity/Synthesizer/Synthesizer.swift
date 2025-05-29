@@ -5,65 +5,72 @@
 //  Created by Sergey on 27.05.2025.
 //
 
-import AVFoundation
+import Combine
 import Foundation
 
-func composeSynthesizer(
-    midiCommandCenter: MidiCommandCenter,
-    oscillatorFactory: CoreOscillatorFactory,
-    engine: AudioEngine
-) -> Synthesizer {
-    let midiEventBus = MidiCommandBus(
-        publisher: midiCommandCenter.publisher
-    )
-    let voice = composeVoice(
-        sampleRate: engine.sampleRate,
-        factory: oscillatorFactory
-    )
-    midiEventBus.add(voice)
-    engine.sampleSource = voice
-    
-    return Synthesizer(
-        midiEventBus: midiEventBus
-    )
-}
-
-func composeVoice(sampleRate: Float) -> CoreVoice {
-    let factory = WaveOscillatorFactory(sampleRate: sampleRate)
-    return composeVoice(
-        sampleRate: sampleRate,
-        factory: factory
-    )
-}
-
-func composeVoice(
-    sampleRate: Float,
-    factory: CoreOscillatorFactory
-) -> CoreVoice {
-    let sineOscillator = factory.oscillator(SineWaveForm())
-    
-    let multiVoice = MixedVoice(oscillators: [
-        factory.oscillator(SquareWaveForm()),
-        DetunedOscillator(
-            oscillator: sineOscillator,
-            detune: 15
-        ),
-        DetunedOscillator(
-            oscillator: sineOscillator,
-            detune: -15
-        )
-    ])
-    
-//    let envelopeFilter = ADSRFilter(sampleRate: sampleRate)
-    
-    let voiceChain = VoiceChain(voice: multiVoice)
-    voiceChain.chain(LowPassFilter(sampleRate: sampleRate, cutoffFrequency: 10_000))
-//    voiceChain.chain(envelopeFilter)
-    voiceChain.chain(ClipFilter(minimum: -1.0, maximum: 1.0))
-    return voiceChain
-}
-
-
 struct Synthesizer {
-    let midiEventBus: MidiCommandBus
+    private let midiEventBus: MidiCommandBus
+    private let oscillatorFactory: CoreOscillatorFactory
+    private weak var engine: AudioEngine?
+    
+    init(
+        engine: AudioEngine,
+        commandPublisher: AnyPublisher<MidiCommand, Never>,
+        oscillatorFactory: CoreOscillatorFactory
+    ) {
+        self.engine = engine
+        self.midiEventBus = MidiCommandBus(
+            publisher: commandPublisher
+        )
+        self.oscillatorFactory = oscillatorFactory
+    }
+    
+    func constructSampleSource() -> CoreSampleSource? {
+        guard let sampleRate = engine?.sampleRate else {
+            return nil
+        }
+//        let oscillator = oscillatorFactory.oscillator(SquareWaveForm())
+        
+        let multiVoice = MixedVoice(
+            oscillators: [
+                oscillatorFactory.oscillator(SawtoothWaveForm()),
+//                DetunedOscillator(
+//                    oscillator: oscillator,
+//                    detune: 15
+//                ),
+//                DetunedOscillator(
+//                    oscillator: oscillator,
+//                    detune: -15
+//                )
+            ],
+            releaseTime: -0.02)
+        
+        let lowPassFilter = LowPassFilter(
+            sampleRate: sampleRate,
+            cutoffFrequency: 10_000
+        )
+        let envelopeFilter = ADSRFilter(
+            sampleRate: sampleRate,
+            releaseTime: 0.3
+        )
+        
+        let voiceChain = VoiceChain(voice: multiVoice)
+        voiceChain.chain(lowPassFilter)
+        voiceChain.chain(envelopeFilter)
+//        voiceChain.chain(AbsFilter())
+        voiceChain.chain(ClipFilter(minimum: -1, maximum: 1))
+
+        midiEventBus.add(voiceChain)
+        midiEventBus.add(lowPassFilter)
+        midiEventBus.add(envelopeFilter)
+
+        return voiceChain
+    }
+    
+    func reconfigure() {
+        guard let source = constructSampleSource() else {
+            return
+        }
+        engine?.sampleSource = source
+    }
 }
