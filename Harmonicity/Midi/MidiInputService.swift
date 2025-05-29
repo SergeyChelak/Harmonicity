@@ -123,12 +123,13 @@ final class MidiInputService {
                         note: note,
                         velocity: velocity
                     )
-                    eventPublisher.send(.note(channel, data))
                     if velocity > 0 {
                         print("Note On: Channel \(channel), Note \(note), Velocity \(velocity)")
+                        eventPublisher.send(.noteOn(channel, data))
                     } else {
                         // Velocity 0 is often used as Note Off
-                        print("Note Off: Channel \(channel), Note \(note), Velocity \(velocity) (implicit)")
+                        print(">>>>>>>> Note Off: Channel \(channel), Note \(note), Velocity \(velocity) (implicit)")
+                        eventPublisher.send(.noteOff(channel, data))
                     }
                     i += 3 // Note On/Off messages are 3 bytes
                 } else {
@@ -139,14 +140,12 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
-                    
                     let data = MIDINote(
                         note: note,
                         velocity: velocity // force 0?
                     )
-                    eventPublisher.send(.note(channel, data))
-                    
                     print("Note Off: Channel \(channel), Note \(note), Velocity \(velocity)")
+                    eventPublisher.send(.noteOff(channel, data))
                     i += 3
                 } else {
                     print("Incomplete Note Off message.")

@@ -12,11 +12,6 @@ typealias Frequency = Float
 
 protocol CoreProcessor {
     func process(_ sample: Sample) -> Sample
-    func reset()
-}
-
-extension CoreProcessor {
-    func reset() { }
 }
 
 protocol CoreSampleSource {
@@ -43,7 +38,11 @@ protocol CoreOscillatorFactory {
     func oscillator(_ waveForm: CoreWaveForm) -> CoreOscillator
 }
 
-protocol CoreVoice: CoreSampleSource {
-    func play(_ note: MIDINote)
-    var amplitude: Float { get }
+protocol CoreVoice: CoreSampleSource, CoreMIDINoteHandler {
+    var isPlaying: Bool { get }
+}
+
+protocol CoreMIDINoteHandler {
+    func noteOn(_ note: MIDINote)
+    func noteOff(_ note: MIDINote)
 }

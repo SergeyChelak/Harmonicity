@@ -47,5 +47,5 @@ struct KeyboardView: View {
 }
 
 #Preview {
-    KeyboardView(octave: 1) { _ in }
+    KeyboardView(octave: 1) { _, _ in }
 }

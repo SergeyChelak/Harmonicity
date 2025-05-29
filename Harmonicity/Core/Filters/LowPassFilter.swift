@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class LowPassFilter: CoreProcessor {
+final class LowPassFilter: CoreProcessor, CoreMIDINoteHandler {
     private let sampleRate: Float
     var cutoffFrequency: Float {
         didSet {
@@ -34,7 +34,11 @@ final class LowPassFilter: CoreProcessor {
         alpha = 1.0 - exp(-2.0 * .pi * clampedCutoff / sampleRate)
     }
     
-    func reset() {
+    func noteOn(_ note: MIDINote) {
         previousOutput = 0.0
+    }
+    
+    func noteOff(_ note: MIDINote) {
+        // no op
     }
 }

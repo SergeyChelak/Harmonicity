@@ -63,17 +63,26 @@ final class Synthesizer {
     }
     
     // TODO: move out this class ------------
-    func play(_ data: MIDINote) {
-        self.sampleSource?.play(data)
+    func noteOn(_ data: MIDINote) {
+        self.sampleSource?.noteOn(data)
+    }
+    
+    func noteOff(_ data: MIDINote) {
+        self.sampleSource?.noteOff(data)
     }
     
     func processMidiEvent(_ event: MidiEvent) {
         switch event {
-        case .note(let channel, let note):
+        case .noteOn(let channel, let note):
             if channel == 0 {
-                play(note)
+                noteOn(note)
+            }
+        case .noteOff(let channel, let note):
+            if channel == 0 {
+                noteOff(note)
             }
         }
+        
     }
     // TODO: end ----------------------------
 }

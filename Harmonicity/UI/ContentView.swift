@@ -13,8 +13,12 @@ struct ContentView: View {
     var body: some View {
         HStack(spacing: 4) {
             ForEach(3...5, id: \.self) { octave in
-                KeyboardView(octave: octave) {
-                    context.synth.play($0)
+                KeyboardView(octave: octave) { note, isOn in
+                    if isOn {
+                        context.synth.noteOn(note)
+                    } else {
+                        context.synth.noteOff(note)
+                    }
                 }
             }
         }

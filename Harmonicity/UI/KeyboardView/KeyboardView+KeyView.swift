@@ -8,7 +8,7 @@
 import SwiftUI
 
 extension KeyboardView {
-    typealias KeyActionCallback = (MIDINote) -> Void
+    typealias KeyActionCallback = (MIDINote, Bool) -> Void
     
     fileprivate enum SharedConstants {
         static let width: CGFloat = 50.0
@@ -47,11 +47,11 @@ extension KeyboardView {
         
         private func onPress(_ isPressed: Bool) {
             print("Virtual keyboard: \(note)\(octave) is pressed \(isPressed)")
-            let data = MIDINote(
+            let note = MIDINote(
                 note: MIDINoteNumber(note.rawValue + 12 * (1 + octave)),
                 velocity: isPressed ? 62 : 0
             )
-            callback(data)
+            callback(note, isPressed)
             isTouching = isPressed
         }
         
@@ -84,7 +84,7 @@ extension KeyboardView {
 
 #Preview {
     ZStack(alignment: .top) {
-        KeyboardView.KeyView(note: .c, octave: 1) { _ in }
-        KeyboardView.KeyView(note: .cs, octave: 1) { _ in }
+        KeyboardView.KeyView(note: .c, octave: 1) { _, _ in }
+        KeyboardView.KeyView(note: .cs, octave: 1) { _, _ in }
     }
 }

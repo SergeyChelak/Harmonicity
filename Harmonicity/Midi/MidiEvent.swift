@@ -12,7 +12,8 @@ typealias MIDINoteNumber = UInt8
 typealias MIDIVelocity = UInt8
 
 enum MidiEvent {
-    case note(MIDIChannel, MIDINote)
+    case noteOn(MIDIChannel, MIDINote)
+    case noteOff(MIDIChannel, MIDINote)
 }
 
 struct MIDINote {
