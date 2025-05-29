@@ -24,7 +24,8 @@ class WaveOscillator: CoreOscillator {
     }
     
     func setFrequency(_ frequency: Frequency) {
-        self.phase = 0.0
+        // TODO: commented for single voice that produces clip after frequency change
+//        self.phase = range.lowerBound
         self.delta = range.length * frequency / sampleRate
     }
     

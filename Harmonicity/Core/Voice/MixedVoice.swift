@@ -46,6 +46,7 @@ class MixedVoice: CoreVoice {
         }
         if releaseTime == 0.0 {
             self.amplitude = 0
+            return
         }
         let durationMs = Int(releaseTime * 1000)
         DispatchQueue

@@ -29,21 +29,23 @@ struct Synthesizer {
         guard let sampleRate = engine?.sampleRate else {
             return nil
         }
-//        let oscillator = oscillatorFactory.oscillator(SquareWaveForm())
+        let squareOscillator = oscillatorFactory.oscillator(SawtoothWaveForm())
+        
+        let sineOscillator = oscillatorFactory.oscillator(SineWaveForm())
         
         let multiVoice = MixedVoice(
             oscillators: [
-                oscillatorFactory.oscillator(SawtoothWaveForm()),
-//                DetunedOscillator(
-//                    oscillator: oscillator,
-//                    detune: 15
-//                ),
-//                DetunedOscillator(
-//                    oscillator: oscillator,
-//                    detune: -15
-//                )
+                squareOscillator,
+                DetunedOscillator(
+                    oscillator: sineOscillator,
+                    detune: 5
+                ),
+                DetunedOscillator(
+                    oscillator: sineOscillator,
+                    detune: -5
+                )
             ],
-            releaseTime: -0.02)
+            releaseTime: -0.1)
         
         let lowPassFilter = LowPassFilter(
             sampleRate: sampleRate,
@@ -51,6 +53,7 @@ struct Synthesizer {
         )
         let envelopeFilter = ADSRFilter(
             sampleRate: sampleRate,
+//            attackTime: 0.1,
             releaseTime: 0.3
         )
         
