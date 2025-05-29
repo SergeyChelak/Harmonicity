@@ -7,13 +7,13 @@
 
 import Foundation
 
-final class VoiceChain: CoreVoice {
-    let voice: CoreVoice
+final class VoiceChain<T: CoreVoice>: CoreVoice {
+    let voice: T
     private var sample: CoreFloat = 0.0
     
     private var processChain: [CoreProcessor] = []
     
-    init(voice: CoreVoice) {
+    init(voice: T) {
         self.voice = voice
     }
         
@@ -39,5 +39,11 @@ final class VoiceChain: CoreVoice {
             sample = processor.process(sample)
         }
         return sample
+    }
+}
+
+extension VoiceChain: CoreMonoVoice where T: CoreMonoVoice {
+    var noteNumber: MidiNoteNumber {
+        voice.noteNumber
     }
 }
