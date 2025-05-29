@@ -20,7 +20,7 @@ class WaveOscillator: CoreOscillator {
     init(sampleRate: Float, waveForm: CoreWaveForm) {
         self.sampleRate = sampleRate
         self.waveForm = waveForm
-        self.range = waveForm.period()
+        self.range = waveForm.phaseRange()
     }
     
     func setFrequency(_ frequency: Frequency) {

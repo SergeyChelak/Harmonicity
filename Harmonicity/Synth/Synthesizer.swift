@@ -10,46 +10,35 @@ import Foundation
 
 final class Synthesizer {
     private let audioEngine = AVAudioEngine()
-    
-    private let voice: Voice
-    
-    init() {
-        self.voice = Voice(
-            oscillators: [
-                Oscillator(waveform: .sine, weight: 0.8),
-                Oscillator(waveform: .triangle, weight: 0.6),
-//                Oscillator(waveform: .sawtooth),
-                Oscillator(waveform: .square)
-            ]
-        )
-    }
-    
+    // TODO: temporary
+    private var sampleSource: CoreVoice?
+
     deinit {
         audioEngine.stop()
     }
-        
+
+    
+    init() {
+        let format = audioEngine.outputNode.inputFormat(forBus: 0)
+        let sampleRate = Float(format.sampleRate)
+//        let oscillator = WaveOscillator(
+//            sampleRate: sampleRate,
+//            waveForm: SquareWaveForm()
+//        )
+        let factory = TableOscillatorFactory(
+            sampleRate: sampleRate,
+            tableSize: 64
+        )
+        let oscillator = factory.oscillator(SineWaveForm())
+        self.sampleSource = SimpleVoice(oscillator: oscillator)
+    }
+    
     func setup() throws {
         let format = audioEngine.outputNode.inputFormat(forBus: 0)
-        self.voice.sampleRate = Float(format.sampleRate)
-        
-        guard let inputFormat = AVAudioFormat(
-            commonFormat: format.commonFormat,
-            sampleRate: format.sampleRate,
-            channels: 1,
-            interleaved: format.isInterleaved
-        ) else {
-            throw NSError(domain: "Synthesizer", code: -2)
-        }
-        
-        let oscillatorMixer = AVAudioMixerNode()
-        audioEngine.attachAndConnect(
-            oscillatorMixer,
-            to: audioEngine.outputNode,
-            format: inputFormat
-        )
-        
-        let sourceNode = AVAudioSourceNode { [weak voice] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
-            guard let voice else {
+//        self.voice.sampleRate = Float(format.sampleRate)
+                        
+        let sourceNode = AVAudioSourceNode { [weak self] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
+            guard let voice = self?.sampleSource else {
                 isSilence.pointee = true
                 return noErr
             }
@@ -68,9 +57,18 @@ final class Synthesizer {
             return noErr
         }
         
+        guard let inputFormat = AVAudioFormat(
+            commonFormat: format.commonFormat,
+            sampleRate: format.sampleRate,
+            channels: 1,
+            interleaved: format.isInterleaved
+        ) else {
+//            throw NSError(domain: "Synthesizer", code: -2)
+            return
+        }
         audioEngine.attachAndConnect(
             sourceNode,
-            to: oscillatorMixer,
+            to: audioEngine.outputNode,
             format: inputFormat
         )
 
@@ -79,26 +77,19 @@ final class Synthesizer {
     }
     
     // TODO: replace to midi action
-    func play(_ action: KeyAction) {
-        let freq = action.note.frequency * Float(1 << action.octave)
-        print("note: \(action.note), freq: \(freq)")
-        let velocity: Float = action.isPressed ? 0.5 : 0.0
-        voice.play(frequency: freq, velocity: velocity)
-    }
+//    func play(_ action: KeyAction) {
+//        let freq = action.note.frequency * Float(1 << action.octave)
+//        print("note: \(action.note), freq: \(freq)")
+//        let velocity: Float = action.isPressed ? 0.5 : 0.0
+//        voice.play(frequency: freq, velocity: velocity)
+//    }
     
+    // TODO: move out this class
     func play(_ data: NoteData) {
         guard data.channel == 0 else {
             return
         }
-        let velocity = Float(data.velocity) / 127
-        
-        // for single voice: don't mute current note if released another one
-        if velocity == 0 && voice.note != data.note {
-            return
-        }
-        let freq = 440.0 * pow(2.0, (Float(data.note) - 69.0) / 12.0)
-        voice.play(frequency: freq, velocity: velocity)
-        voice.note = data.note
+        self.sampleSource?.play(data)
     }
     
     func processMidiEvent(_ event: MidiEvent) {

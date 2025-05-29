@@ -24,9 +24,9 @@ final class TableOscillatorFactory: CoreOscillatorFactory {
 
 fileprivate func makeTable(from waveForm: CoreWaveForm, _ tableSize: Int) -> [Float] {
     let size = Float(tableSize)
-    let period = waveForm.period()
-    let duration = period.length
-    let offset = period.lowerBound
+    let range = waveForm.phaseRange()
+    let duration = range.length
+    let offset = range.lowerBound
     var table: [Float] = []
     for n in 0..<tableSize {
         let value = waveForm.value(duration * Float(n) / size + offset)

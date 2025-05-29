@@ -14,23 +14,30 @@ protocol CoreProcessor {
     func process(x: Sample) -> Sample
 }
 
-protocol CoreOscillator {
-    func setFrequency(_ frequency: Frequency)
+protocol CoreSampleSource {
     func nextSample() -> Sample
+}
+
+protocol CoreOscillator: CoreSampleSource {
+    func setFrequency(_ frequency: Frequency)
 }
 
 protocol CoreWaveForm {
     func value(_ x: Float) -> Float
-    func period() -> Range<Float>
+    func phaseRange() -> Range<Float>
 }
 
 extension CoreWaveForm {
-    func periodDuration() -> Float {
-        let p = self.period()
+    func phaseDuration() -> Float {
+        let p = self.phaseRange()
         return p.upperBound - p.lowerBound
     }
 }
 
 protocol CoreOscillatorFactory {
     func oscillator(_ waveForm: CoreWaveForm) -> CoreOscillator
+}
+
+protocol CoreVoice: CoreSampleSource {
+    func play(_ note: NoteData)
 }

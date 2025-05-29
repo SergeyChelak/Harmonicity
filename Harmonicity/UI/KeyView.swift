@@ -7,13 +7,7 @@
 
 import SwiftUI
 
-struct KeyAction {
-    let note: Note
-    let octave: Int
-    let isPressed: Bool
-}
-
-typealias KeyActionCallback = (KeyAction) -> Void
+typealias KeyActionCallback = (NoteData) -> Void
 
 fileprivate enum SharedConstants {
     static let width: CGFloat = 50.0
@@ -51,12 +45,13 @@ struct KeyView: View {
     }
     
     private func onPress(_ isPressed: Bool) {
-        let action = KeyAction(
-            note: note,
-            octave: octave,
-            isPressed: isPressed
+        print("Virtual keyboard: \(note)\(octave) is pressed \(isPressed)")
+        let data = NoteData(
+            channel: 0,
+            note: MIDINote(note.rawValue + 12 * (1 + octave)),
+            velocity: isPressed ? 62 : 0
         )
-        callback(action)
+        callback(data)
         isTouching = isPressed
     }
     

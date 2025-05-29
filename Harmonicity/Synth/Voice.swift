@@ -7,6 +7,35 @@
 
 import Foundation
 
+final class SimpleVoice: CoreVoice {
+    private let oscillator: CoreOscillator
+    private var velocity: Float = 0.0
+    
+    private var note: MIDINote = 0
+    
+    init(oscillator: CoreOscillator) {
+        self.oscillator = oscillator
+    }
+    
+    func play(_ data: NoteData) {
+        let velocity = Float(data.velocity) / 127
+        // don't mute current note if released another one
+        if velocity == 0 && note != data.note {
+            return
+        }
+        self.velocity = velocity
+        self.note = data.note
+        let freq = 440.0 * pow(2.0, (Float(data.note) - 69.0) / 12.0)
+        print("Voice frequency: \(freq)")
+        oscillator.setFrequency(freq)
+    }
+    
+    func nextSample() -> Sample {
+        velocity * oscillator.nextSample()
+    }
+}
+
+
 final class Oscillator {
     var waveform: Waveform
     var weight: Float
@@ -62,9 +91,4 @@ final class Voice {
         self.velocity = velocity
         self.delta = 2.0 * .pi * frequency / sampleRate
     }
-    
-    var isPlaying: Bool {
-        self.velocity > 0.0
-    }
-
 }

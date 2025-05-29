@@ -11,23 +11,35 @@ class TableOscillator: CoreOscillator {
     private let sampleRate: Float
     private let table: [Sample]
     
+    // TODO: check if float is good approach
+    private var index: Float = 0.0
+    private var step: Float = 0.0
+    
+    // cache
+    private let size: Float
+    
     init(sampleRate: Float, table: [Sample]) {
         self.sampleRate = sampleRate
         self.table = table
+        self.size = Float(table.count)
     }
     
     func setFrequency(_ frequency: Frequency) {
-        fatalError()
+        self.index = 0
+        self.step = frequency * size / sampleRate
     }
     
     func nextSample() -> Sample {
-        fatalError()
+        let sample = self.lerp()
+        self.index = (self.index + step).truncatingRemainder(dividingBy: size)
+        return sample
     }
-}
-
-// TODO: move to extensions file
-extension Float {
-    func lerp(_ v1: Self, _ v2: Self) -> Self {
-        (1 - self) * v1 + self * v2;
+    
+    private func lerp() -> Sample {
+        let truncatedIndex = Int(index)
+        let nextIndex = (truncatedIndex + 1) % table.count
+        let nextIndexWeight = index - Float(truncatedIndex)
+        let truncatedIndexWeight = 1.0 - nextIndexWeight
+        return truncatedIndexWeight * table[truncatedIndex] + nextIndexWeight * table[nextIndex]
     }
 }
