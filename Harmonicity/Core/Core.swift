@@ -7,28 +7,27 @@
 
 import Foundation
 
-typealias Sample = Float
-typealias Frequency = Float
+typealias CoreFloat = Double
 
 protocol CoreProcessor {
-    func process(_ sample: Sample) -> Sample
+    func process(_ sample: CoreFloat) -> CoreFloat
 }
 
 protocol CoreSampleSource {
-    func nextSample() -> Sample
+    func nextSample() -> CoreFloat
 }
 
 protocol CoreOscillator: CoreSampleSource {
-    func setFrequency(_ frequency: Frequency)
+    func setFrequency(_ frequency: CoreFloat)
 }
 
 protocol CoreWaveForm {
-    func value(_ x: Float) -> Float
-    func phaseRange() -> Range<Float>
+    func value(_ x: CoreFloat) -> CoreFloat
+    func phaseRange() -> Range<CoreFloat>
 }
 
 extension CoreWaveForm {
-    func phaseDuration() -> Float {
+    func phaseDuration() -> CoreFloat {
         let p = self.phaseRange()
         return p.upperBound - p.lowerBound
     }

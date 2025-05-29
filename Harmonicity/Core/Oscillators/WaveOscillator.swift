@@ -8,28 +8,28 @@
 import Foundation
 
 class WaveOscillator: CoreOscillator {
-    private let sampleRate: Float
+    private let sampleRate: CoreFloat
     private let waveForm: CoreWaveForm
     
-    private var phase: Float = 0.0
-    private var delta: Float = 0.0
+    private var phase: CoreFloat = 0.0
+    private var delta: CoreFloat = 0.0
     
     // cache
-    private let range: Range<Float>
+    private let range: Range<CoreFloat>
     
-    init(sampleRate: Float, waveForm: CoreWaveForm) {
+    init(sampleRate: CoreFloat, waveForm: CoreWaveForm) {
         self.sampleRate = sampleRate
         self.waveForm = waveForm
         self.range = waveForm.phaseRange()
     }
     
-    func setFrequency(_ frequency: Frequency) {
+    func setFrequency(_ frequency: CoreFloat) {
         // TODO: commented for single voice that produces clip after frequency change
 //        self.phase = range.lowerBound
         self.delta = range.length * frequency / sampleRate
     }
     
-    func nextSample() -> Sample {
+    func nextSample() -> CoreFloat {
         let sample = waveForm.value(phase)
         phase += delta
         if phase >= range.upperBound {

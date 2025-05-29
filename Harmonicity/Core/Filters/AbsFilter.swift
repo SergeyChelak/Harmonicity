@@ -8,7 +8,7 @@
 import Foundation
 
 final class AbsFilter: CoreProcessor {
-    func process(_ sample: Sample) -> Sample {
+    func process(_ sample: CoreFloat) -> CoreFloat {
         abs(sample)
     }
 }

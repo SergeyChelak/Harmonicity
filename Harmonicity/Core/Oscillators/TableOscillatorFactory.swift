@@ -8,10 +8,10 @@
 import Foundation
 
 final class TableOscillatorFactory: CoreOscillatorFactory {
-    private let sampleRate: Float
+    private let sampleRate: CoreFloat
     private let tableSize: Int
     
-    init(sampleRate: Float, tableSize: Int) {
+    init(sampleRate: CoreFloat, tableSize: Int) {
         self.sampleRate = sampleRate
         self.tableSize = tableSize
     }
@@ -22,14 +22,14 @@ final class TableOscillatorFactory: CoreOscillatorFactory {
     }
 }
 
-fileprivate func makeTable(from waveForm: CoreWaveForm, _ tableSize: Int) -> [Float] {
-    let size = Float(tableSize)
+fileprivate func makeTable(from waveForm: CoreWaveForm, _ tableSize: Int) -> [CoreFloat] {
+    let size = CoreFloat(tableSize)
     let range = waveForm.phaseRange()
     let duration = range.length
     let offset = range.lowerBound
-    var table: [Float] = []
+    var table: [CoreFloat] = []
     for n in 0..<tableSize {
-        let value = waveForm.value(duration * Float(n) / size + offset)
+        let value = waveForm.value(duration * CoreFloat(n) / size + offset)
         table.append(value)
     }
     return table

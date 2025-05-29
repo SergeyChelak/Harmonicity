@@ -32,7 +32,7 @@ final class VoiceChain: CoreVoice {
         voice.noteOff(note)
     }
     
-    func nextSample() -> Sample {
+    func nextSample() -> CoreFloat {
         var sample = voice.nextSample()
         for processor in processChain {
             sample = processor.process(sample)

@@ -9,14 +9,14 @@ import Foundation
 
 class MixedVoice: CoreVoice {
     private let oscillators: [CoreOscillator]
-    private var amplitude: Float = 0.0
+    private var amplitude: CoreFloat = 0.0
     private var note: MidiNoteNumber = .max
     private(set) var isPlaying = false
-    private var releaseTime: Float
+    private var releaseTime: CoreFloat
     
     init(
         oscillators: [CoreOscillator],
-        releaseTime: Float = 0.0
+        releaseTime: CoreFloat = 0.0
     ) {
         self.oscillators = oscillators
         self.releaseTime = releaseTime
@@ -24,10 +24,10 @@ class MixedVoice: CoreVoice {
     
     func noteOn(_ note: MidiNote) {
         isPlaying = true
-        let velocity = Float(note.velocity) / 127
+        let velocity = CoreFloat(note.velocity) / 127
         self.amplitude = velocity
         self.note = note.note
-        let freq = 440.0 * pow(2.0, (Float(note.note) - 69.0) / 12.0)
+        let freq = 440.0 * pow(2.0, (CoreFloat(note.note) - 69.0) / 12.0)
         print("Voice frequency: \(freq)")
         oscillators.forEach {
             $0.setFrequency(freq)
@@ -56,9 +56,9 @@ class MixedVoice: CoreVoice {
             }
     }
         
-    func nextSample() -> Sample {
+    func nextSample() -> CoreFloat {
         amplitude * oscillators
             .map { $0.nextSample() }
-            .reduce(0.0) { $0 + $1 } / Float(oscillators.count)
+            .reduce(0.0) { $0 + $1 } / CoreFloat(oscillators.count)
     }
 }

@@ -17,25 +17,25 @@ final class ADSRFilter: CoreProcessor, CoreMIDINoteHandler {
     }
 
     // MARK: - user controlled envelope parameters
-    var attackTime: Float
-    var decayTime: Float
-    var sustainLevel: Float
-    var releaseTime: Float
+    var attackTime: CoreFloat
+    var decayTime: CoreFloat
+    var sustainLevel: CoreFloat
+    var releaseTime: CoreFloat
 
     // MARK: - envelope state
     private var currentState: State = .idle
-    private var currentLevel: Float = 0.0    // 0.0 - 1.0
-    private var segmentProgress: Float = 0.0 // 0.0 - 1.0
-    private var startLevel: Float = 0.0
-    private let sampleRate: Float
+    private var currentLevel: CoreFloat = 0.0    // 0.0 - 1.0
+    private var segmentProgress: CoreFloat = 0.0 // 0.0 - 1.0
+    private var startLevel: CoreFloat = 0.0
+    private let sampleRate: CoreFloat
     private var noteNumber: MidiNoteNumber = .max
 
     init(
-        sampleRate: Float,
-        attackTime: Float = 0.01,
-        decayTime: Float = 0.1,
-        sustainLevel: Float = 0.7,
-        releaseTime: Float = 0.2
+        sampleRate: CoreFloat,
+        attackTime: CoreFloat = 0.01,
+        decayTime: CoreFloat = 0.1,
+        sustainLevel: CoreFloat = 0.7,
+        releaseTime: CoreFloat = 0.2
     ) {
         self.sampleRate = sampleRate
         self.attackTime = attackTime
@@ -69,11 +69,11 @@ final class ADSRFilter: CoreProcessor, CoreMIDINoteHandler {
         startLevel = 0.0
     }
     
-    func process(_ sample: Sample) -> Sample {
-        level * sample
+    func process(_ sample: CoreFloat) -> CoreFloat {
+        level() * sample
     }
 
-    private var level: Float {
+    private func level() -> CoreFloat {
         switch currentState {
         case .idle:
             currentLevel = 0.0

@@ -21,8 +21,8 @@ final class AudioEngine {
         audioEngine.stop()
     }
     
-    var sampleRate: Float {
-        Float(audioEngine.outputNode.inputFormat(forBus: 0).sampleRate)
+    var sampleRate: CoreFloat {
+        audioEngine.outputNode.inputFormat(forBus: 0).sampleRate
     }
     
     func setup() throws {
@@ -38,7 +38,7 @@ final class AudioEngine {
                     guard let pointer = buffer.mData?.assumingMemoryBound(to: Float.self) else {
                         continue
                     }
-                    pointer[frame] = sample
+                    pointer[frame] = Float(sample)
                 }
             }
             

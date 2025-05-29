@@ -8,9 +8,9 @@
 import Foundation
 
 final class WaveOscillatorFactory: CoreOscillatorFactory {
-    private let sampleRate: Float
+    private let sampleRate: CoreFloat
     
-    init(sampleRate: Float) {
+    init(sampleRate: CoreFloat) {
         self.sampleRate = sampleRate
     }
     

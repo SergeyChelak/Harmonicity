@@ -8,22 +8,22 @@
 import Foundation
 
 final class LowPassFilter: CoreProcessor, CoreMIDINoteHandler {
-    private let sampleRate: Float
-    var cutoffFrequency: Float {
+    private let sampleRate: CoreFloat
+    var cutoffFrequency: CoreFloat {
         didSet {
             updateCoefficients()
         }
     }
-    private var alpha: Float = 0.0
-    private var previousOutput: Float = 0.0
+    private var alpha: CoreFloat = 0.0
+    private var previousOutput: CoreFloat = 0.0
     
-    init(sampleRate: Float, cutoffFrequency: Float = 20_000) {
+    init(sampleRate: CoreFloat, cutoffFrequency: CoreFloat = 20_000) {
         self.sampleRate = sampleRate
         self.cutoffFrequency = cutoffFrequency
         updateCoefficients()
     }
     
-    func process(_ sample: Sample) -> Sample {
+    func process(_ sample: CoreFloat) -> CoreFloat {
         let output = previousOutput + alpha * (sample - previousOutput)
         previousOutput = output
         return output

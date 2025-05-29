@@ -8,15 +8,15 @@
 import Foundation
 
 final class ClipFilter: CoreProcessor {
-    private let minimum: Sample
-    private let maximum: Sample
+    private let minimum: CoreFloat
+    private let maximum: CoreFloat
     
-    init(minimum: Sample, maximum: Sample) {
+    init(minimum: CoreFloat, maximum: CoreFloat) {
         self.minimum = minimum
         self.maximum = maximum
     }
     
-    func process(_ sample: Sample) -> Sample {
+    func process(_ sample: CoreFloat) -> CoreFloat {
         max(min(sample, maximum), minimum)
     }
 }
