@@ -8,54 +8,19 @@
 import AVFoundation
 import Foundation
 
-func composeVoice(sampleRate: Float) -> CoreVoice {
-    let squareOscillator = WaveOscillator(
-        sampleRate: sampleRate,
-        waveForm: SquareWaveForm()
-    )
-    
-    let sineOscillator = WaveOscillator(
-        sampleRate: sampleRate,
-        waveForm: SineWaveForm()
-    )
-    
-    let multiVoice = MultiVoice(oscillators: [
-        squareOscillator,
-        DetunedOscillator(
-            oscillator: sineOscillator,
-            detune: 15
-        ),
-        DetunedOscillator(
-            oscillator: sineOscillator,
-            detune: -15
-        )
-    ])
-    
-//    let envelopeFilter = ADSRFilter(sampleRate: sampleRate)
-    
-    let voiceChain = VoiceChain(voice: multiVoice)
-    voiceChain.chain(LowPassFilter(sampleRate: sampleRate, cutoffFrequency: 10_000))
-//    voiceChain.chain(envelopeFilter)
-    voiceChain.chain(ClipFilter(minimum: -1.0, maximum: 1.0))
-    return voiceChain
-}
-
-
 final class Synthesizer {
     private let audioEngine = AVAudioEngine()
-    // TODO: temporary
     private var sampleSource: CoreVoice?
-
-    deinit {
-        audioEngine.stop()
-    }
-
     
     init() {
+        // TODO: pass as a parameter
         let format = audioEngine.outputNode.inputFormat(forBus: 0)
         let sampleRate = Float(format.sampleRate)
-
         self.sampleSource = composeVoice(sampleRate: sampleRate)
+    }
+    
+    deinit {
+        audioEngine.stop()
     }
     
     func setup() throws {
