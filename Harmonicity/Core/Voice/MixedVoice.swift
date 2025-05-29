@@ -10,7 +10,7 @@ import Foundation
 class MixedVoice: CoreVoice {
     private let oscillators: [CoreOscillator]
     private var amplitude: Float = 0.0
-    private var note: MIDINoteNumber = .max
+    private var note: MidiNoteNumber = .max
     private(set) var isPlaying = false
     private var releaseTime: Float
     
@@ -22,7 +22,7 @@ class MixedVoice: CoreVoice {
         self.releaseTime = releaseTime
     }
     
-    func noteOn(_ note: MIDINote) {
+    func noteOn(_ note: MidiNote) {
         isPlaying = true
         let velocity = Float(note.velocity) / 127
         self.amplitude = velocity
@@ -34,7 +34,7 @@ class MixedVoice: CoreVoice {
         }
     }
     
-    func noteOff(_ note: MIDINote) {
+    func noteOff(_ note: MidiNote) {
         // don't mute current note if released another one
         guard self.note == note.note else {
             return
@@ -55,7 +55,7 @@ class MixedVoice: CoreVoice {
             }
     }
     
-    func play(_ data: MIDINote) {
+    func play(_ data: MidiNote) {
         let velocity = Float(data.velocity) / 127
         // don't mute current note if released another one
         if velocity == 0 && note != data.note {

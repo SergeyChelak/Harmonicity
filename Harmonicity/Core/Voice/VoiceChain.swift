@@ -24,11 +24,11 @@ final class VoiceChain: CoreVoice {
         voice.isPlaying
     }
     
-    func noteOn(_ note: MIDINote) {
+    func noteOn(_ note: MidiNote) {
         voice.noteOn(note)
     }
     
-    func noteOff(_ note: MIDINote) {
+    func noteOff(_ note: MidiNote) {
         voice.noteOff(note)
     }
     

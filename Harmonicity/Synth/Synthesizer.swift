@@ -8,92 +8,62 @@
 import AVFoundation
 import Foundation
 
-final class Synthesizer {
-    private let audioEngine = AVAudioEngine()
-    private var sampleSource: CoreVoice?
+func composeSynthesizer(
+    midiCommandCenter: MidiCommandCenter,
+    oscillatorFactory: CoreOscillatorFactory,
+    engine: AudioEngine
+) -> Synthesizer {
+    let midiEventBus = MidiCommandBus(
+        publisher: midiCommandCenter.publisher
+    )
+    let voice = composeVoice(
+        sampleRate: engine.sampleRate,
+        factory: oscillatorFactory
+    )
+    midiEventBus.add(voice)
+    engine.sampleSource = voice
     
-    init() {
-        // TODO: pass as a parameter
-        let format = audioEngine.outputNode.inputFormat(forBus: 0)
-        let sampleRate = Float(format.sampleRate)
-        self.sampleSource = composeVoice(sampleRate: sampleRate)
-    }
-    
-    deinit {
-        audioEngine.stop()
-    }
-    
-    func setup() throws {
-        let sourceNode = AVAudioSourceNode { [weak self] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
-            guard let voice = self?.sampleSource else {
-                isSilence.pointee = true
-                return noErr
-            }
-            let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
-            for frame in 0..<Int(frameCount) {
-                let sample = voice.nextSample()
-                for buffer in ablPointer {
-                    guard let pointer = buffer.mData?.assumingMemoryBound(to: Float.self) else {
-                        continue
-                    }
-                    pointer[frame] = sample
-                }
-            }
-            
-            isSilence.pointee = false
-            return noErr
-        }
-        let format = audioEngine.outputNode.inputFormat(forBus: 0)
-        guard let inputFormat = AVAudioFormat(
-            commonFormat: format.commonFormat,
-            sampleRate: format.sampleRate,
-            channels: 1,
-            interleaved: format.isInterleaved
-        ) else {
-            throw NSError(domain: "Synthesizer", code: -2)
-        }
-        audioEngine.attachAndConnect(
-            sourceNode,
-            to: audioEngine.outputNode,
-            format: inputFormat
-        )
-
-        audioEngine.prepare()
-        try audioEngine.start()
-    }
-    
-    // TODO: move out this class ------------
-    func noteOn(_ data: MIDINote) {
-        self.sampleSource?.noteOn(data)
-    }
-    
-    func noteOff(_ data: MIDINote) {
-        self.sampleSource?.noteOff(data)
-    }
-    
-    func processMidiEvent(_ event: MidiEvent) {
-        switch event {
-        case .noteOn(let channel, let note):
-            if channel == 0 {
-                noteOn(note)
-            }
-        case .noteOff(let channel, let note):
-            if channel == 0 {
-                noteOff(note)
-            }
-        }
-        
-    }
-    // TODO: end ----------------------------
+    return Synthesizer(
+        midiEventBus: midiEventBus
+    )
 }
 
-fileprivate extension AVAudioEngine {
-    func attachAndConnect(
-        _ node: AVAudioNode,
-        to node2: AVAudioNode,
-        format: AVAudioFormat?
-    ) {
-        attach(node)
-        connect(node, to: node2, format: format)
-    }
+func composeVoice(sampleRate: Float) -> CoreVoice {
+    let factory = WaveOscillatorFactory(sampleRate: sampleRate)
+    return composeVoice(
+        sampleRate: sampleRate,
+        factory: factory
+    )
+}
+
+func composeVoice(
+    sampleRate: Float,
+    factory: CoreOscillatorFactory
+) -> CoreVoice {
+    let sineOscillator = factory.oscillator(SineWaveForm())
+    
+    let multiVoice = MixedVoice(oscillators: [
+        factory.oscillator(SquareWaveForm()),
+        DetunedOscillator(
+            oscillator: sineOscillator,
+            detune: 15
+        ),
+        DetunedOscillator(
+            oscillator: sineOscillator,
+            detune: -15
+        )
+    ])
+    
+//    let envelopeFilter = ADSRFilter(sampleRate: sampleRate)
+    
+    let voiceChain = VoiceChain(voice: multiVoice)
+    voiceChain.chain(LowPassFilter(sampleRate: sampleRate, cutoffFrequency: 10_000))
+//    voiceChain.chain(envelopeFilter)
+    voiceChain.chain(ClipFilter(minimum: -1.0, maximum: 1.0))
+    return voiceChain
+}
+
+
+struct Synthesizer {
+    let midiEventBus: MidiCommandBus
 }

@@ -34,11 +34,11 @@ final class LowPassFilter: CoreProcessor, CoreMIDINoteHandler {
         alpha = 1.0 - exp(-2.0 * .pi * clampedCutoff / sampleRate)
     }
     
-    func noteOn(_ note: MIDINote) {
+    func noteOn(_ note: MidiNote) {
         previousOutput = 0.0
     }
     
-    func noteOff(_ note: MIDINote) {
+    func noteOff(_ note: MidiNote) {
         // no op
     }
 }

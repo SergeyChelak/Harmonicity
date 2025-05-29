@@ -8,16 +8,16 @@
 import SwiftUI
 
 struct ContentView: View {
-    let context: HarmonicityAppContext
+    let context: Context
     
     var body: some View {
         HStack(spacing: 4) {
             ForEach(3...5, id: \.self) { octave in
                 KeyboardView(octave: octave) { note, isOn in
                     if isOn {
-                        context.synth.noteOn(note)
+                        context.commandCenter.on(note: note.note, velocity: note.velocity, channel: 0)
                     } else {
-                        context.synth.noteOff(note)
+                        context.commandCenter.off(note: note.note, velocity: note.velocity, channel: 0)
                     }
                 }
             }

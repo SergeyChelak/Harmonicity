@@ -6,24 +6,20 @@
 //
 
 import CoreMIDI
-import Combine
 import Foundation
 
 final class MidiInputService {
     private var midiClient = MIDIClientRef()
     private var midiInputPort = MIDIPortRef()
-    private let eventPublisher = PassthroughSubject<MidiEvent, Never>()
+    private let commandCenter: MidiCommandCenter
     
-    init() {
+    init(_ commandCenter: MidiCommandCenter) {
+        self.commandCenter = commandCenter
         setupMIDIClient()
         setupMIDIInputPort()
         findAndConnectMIDISources()
     }
-    
-    var publisher: AnyPublisher<MidiEvent, Never> {
-        eventPublisher.eraseToAnyPublisher()
-    }
-    
+        
     /// Sets up the CoreMIDI client.
     private func setupMIDIClient() {
         let clientName = "MIDIKeyboardReaderClient" as CFString
@@ -119,17 +115,13 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
-                    let data = MIDINote(
-                        note: note,
-                        velocity: velocity
-                    )
                     if velocity > 0 {
                         print("Note On: Channel \(channel), Note \(note), Velocity \(velocity)")
-                        eventPublisher.send(.noteOn(channel, data))
+                        commandCenter.on(note: note, velocity: velocity, channel: channel)
                     } else {
                         // Velocity 0 is often used as Note Off
                         print(">>>>>>>> Note Off: Channel \(channel), Note \(note), Velocity \(velocity) (implicit)")
-                        eventPublisher.send(.noteOff(channel, data))
+                        commandCenter.off(note: note, velocity: velocity, channel: channel)
                     }
                     i += 3 // Note On/Off messages are 3 bytes
                 } else {
@@ -140,12 +132,8 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
-                    let data = MIDINote(
-                        note: note,
-                        velocity: velocity // force 0?
-                    )
                     print("Note Off: Channel \(channel), Note \(note), Velocity \(velocity)")
-                    eventPublisher.send(.noteOff(channel, data))
+                    commandCenter.off(note: note, velocity: velocity, channel: channel)
                     i += 3
                 } else {
                     print("Incomplete Note Off message.")

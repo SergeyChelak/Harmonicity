@@ -28,7 +28,7 @@ final class ADSRFilter: CoreProcessor, CoreMIDINoteHandler {
     private var segmentProgress: Float = 0.0 // 0.0 - 1.0
     private var startLevel: Float = 0.0
     private let sampleRate: Float
-    private var noteNumber: MIDINoteNumber = .max
+    private var noteNumber: MidiNoteNumber = .max
 
     init(
         sampleRate: Float,
@@ -44,14 +44,14 @@ final class ADSRFilter: CoreProcessor, CoreMIDINoteHandler {
         self.releaseTime = releaseTime
     }
 
-    func noteOn(_ note: MIDINote) {
+    func noteOn(_ note: MidiNote) {
         noteNumber = note.note
         startLevel = currentLevel
         segmentProgress = 0.0
         currentState = .attack
     }
 
-    func noteOff(_ note: MIDINote) {
+    func noteOff(_ note: MidiNote) {
         // don't start release phase for other released notes
         guard note.note == noteNumber else {
             return

@@ -5,34 +5,13 @@
 //  Created by Sergey on 27.05.2025.
 //
 
-import Combine
 import SwiftUI
-
-final class HarmonicityAppContext {
-    private var cancellable: AnyCancellable?
-    let synth: Synthesizer
-    let midiInput: MidiInputService
-    
-    init(synth: Synthesizer, midiInput: MidiInputService) {
-        self.synth = synth
-        self.midiInput = midiInput
-        
-        setup()
-    }
-    
-    private func setup() {
-        cancellable = midiInput.publisher
-            .sink { [weak self] event in
-                self?.synth.processMidiEvent(event)
-            }
-    }
-}
 
 @main
 struct HarmonicityApp: App {
     enum HarmonicityAppState {
         case initial
-        case ready(HarmonicityAppContext)
+        case ready(Context)
         case error(Error)
     }
 
@@ -44,19 +23,10 @@ struct HarmonicityApp: App {
             contentView()
                 .task {
                     do {
-                        let synth = Synthesizer()
-                        try synth.setup()
-                        
-                        let midiInput = MidiInputService()
-                        
-                        let context = HarmonicityAppContext(
-                            synth: synth,
-                            midiInput: midiInput
-                        )
+                        let context = try composeContext()
                         state = .ready(context)
                     } catch {
                         state = .error(NSError(domain: "HarmonicityApp", code: -1))
-                        return
                     }
                 }
 #if os(OSX)

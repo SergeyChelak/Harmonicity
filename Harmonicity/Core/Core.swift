@@ -43,6 +43,6 @@ protocol CoreVoice: CoreSampleSource, CoreMIDINoteHandler {
 }
 
 protocol CoreMIDINoteHandler {
-    func noteOn(_ note: MIDINote)
-    func noteOff(_ note: MIDINote)
+    func noteOn(_ note: MidiNote)
+    func noteOff(_ note: MidiNote)
 }
