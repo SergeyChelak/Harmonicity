@@ -41,6 +41,10 @@ protocol CoreVoice: CoreSampleSource, CoreMIDINoteHandler {
     var isPlaying: Bool { get }
 }
 
+protocol CoreMonoVoice: CoreVoice {
+    var noteNumber: MidiNoteNumber { get }
+}
+
 protocol CoreMIDINoteHandler {
     func noteOn(_ note: MidiNote)
     func noteOff(_ note: MidiNote)

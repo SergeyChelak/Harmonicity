@@ -9,6 +9,7 @@ import Foundation
 
 final class VoiceChain: CoreVoice {
     let voice: CoreVoice
+    private var sample: CoreFloat = 0.0
     
     private var processChain: [CoreProcessor] = []
     
@@ -21,7 +22,7 @@ final class VoiceChain: CoreVoice {
     }
     
     var isPlaying: Bool {
-        voice.isPlaying
+        abs(sample) < 1e-10
     }
     
     func noteOn(_ note: MidiNote) {
@@ -33,7 +34,7 @@ final class VoiceChain: CoreVoice {
     }
     
     func nextSample() -> CoreFloat {
-        var sample = voice.nextSample()
+        sample = voice.nextSample()
         for processor in processChain {
             sample = processor.process(sample)
         }
