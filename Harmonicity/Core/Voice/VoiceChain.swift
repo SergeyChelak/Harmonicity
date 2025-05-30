@@ -30,22 +30,14 @@ final class VoiceChain<T: CoreVoice>: CoreVoice {
     
     func noteOn(_ note: MidiNote) {
         voice.noteOn(note)
-        for elem in processChain {
-            guard let handler = elem as? CoreMIDINoteHandler else {
-                continue
-            }
-            handler.noteOn(note)
-        }
+        noteHandlers()
+            .forEach { $0.noteOn(note) }
     }
     
     func noteOff(_ note: MidiNote) {
         voice.noteOff(note)
-        for elem in processChain {
-            guard let handler = elem as? CoreMIDINoteHandler else {
-                continue
-            }
-            handler.noteOff(note)
-        }
+        noteHandlers()
+            .forEach { $0.noteOff(note) }
     }
     
     func nextSample() -> CoreFloat {
@@ -54,6 +46,13 @@ final class VoiceChain<T: CoreVoice>: CoreVoice {
             sample = processor.process(sample)
         }
         return sample
+    }
+    
+    private func noteHandlers() -> [CoreMIDINoteHandler] {
+        processChain
+            .compactMap {
+                $0 as? CoreMIDINoteHandler
+            }
     }
 }
 
