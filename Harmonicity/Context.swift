@@ -38,6 +38,7 @@ func composeContext() throws -> Context {
     )
     
     let synthesizer = Synthesizer(
+        voices: 8,
         engine: engine,
         commandPublisher: commandCenter.publisher,
         oscillatorFactory: factory

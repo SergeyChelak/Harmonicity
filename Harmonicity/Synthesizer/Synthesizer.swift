@@ -12,12 +12,15 @@ struct Synthesizer {
     private let midiEventBus: MidiCommandBus
     private let oscillatorFactory: CoreOscillatorFactory
     private weak var engine: AudioEngine?
+    private let voices: Int
     
     init(
+        voices: Int,
         engine: AudioEngine,
         commandPublisher: AnyPublisher<MidiCommand, Never>,
         oscillatorFactory: CoreOscillatorFactory
     ) {
+        self.voices = voices
         self.engine = engine
         self.midiEventBus = MidiCommandBus(
             publisher: commandPublisher
@@ -29,19 +32,27 @@ struct Synthesizer {
         guard let sampleRate = engine?.sampleRate else {
             return nil
         }
-        let squareOscillator = oscillatorFactory.oscillator(SawtoothWaveForm())
-        
+        let monoVoices = (0..<voices).map { _ in constructMonoVoice(sampleRate) }
+        let voice = PolyphonicVoice(voices: monoVoices)
+        let voiceChain = VoiceChain(voice: voice)
+        midiEventBus.add(voiceChain)
+        return voiceChain
+    }
+    
+    private func constructMonoVoice(_ sampleRate: CoreFloat) -> CoreMonoVoice {
+        let sawtoothOscillator = oscillatorFactory.oscillator(SawtoothWaveForm())
         let sineOscillator = oscillatorFactory.oscillator(SineWaveForm())
+        let squareOscillator = oscillatorFactory.oscillator(SquareWaveForm())
         
         let multiVoice = MixedVoice(
             oscillators: [
-                squareOscillator,
+                sawtoothOscillator,
                 DetunedOscillator(
                     oscillator: sineOscillator,
                     detune: 5
                 ),
                 DetunedOscillator(
-                    oscillator: sineOscillator,
+                    oscillator: squareOscillator,
                     detune: -5
                 )
             ],
@@ -53,20 +64,12 @@ struct Synthesizer {
         )
         let envelopeFilter = ADSRFilter(
             sampleRate: sampleRate,
-//            attackTime: 0.1,
             releaseTime: 0.3
         )
         
         let voiceChain = VoiceChain(voice: multiVoice)
         voiceChain.chain(lowPassFilter)
         voiceChain.chain(envelopeFilter)
-//        voiceChain.chain(AbsFilter())
-        voiceChain.chain(ClipFilter(minimum: -1, maximum: 1))
-
-        midiEventBus.add(voiceChain)
-        midiEventBus.add(lowPassFilter)
-        midiEventBus.add(envelopeFilter)
-
         return voiceChain
     }
     

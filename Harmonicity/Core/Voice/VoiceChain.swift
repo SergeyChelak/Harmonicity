@@ -9,7 +9,6 @@ import Foundation
 
 final class VoiceChain<T: CoreVoice>: CoreVoice {
     let voice: T
-    private var sample: CoreFloat = 0.0
     
     private var processChain: [CoreProcessor] = []
     
@@ -21,20 +20,36 @@ final class VoiceChain<T: CoreVoice>: CoreVoice {
         processChain.append(processor)
     }
     
-    var isPlaying: Bool {
-        abs(sample) < 1e-10
+    var state: VoiceState {
+        voice.state
+    }
+    
+    func canPlay(_ note: MidiNote) -> Bool {
+        voice.canPlay(note)
     }
     
     func noteOn(_ note: MidiNote) {
         voice.noteOn(note)
+        for elem in processChain {
+            guard let handler = elem as? CoreMIDINoteHandler else {
+                continue
+            }
+            handler.noteOn(note)
+        }
     }
     
     func noteOff(_ note: MidiNote) {
         voice.noteOff(note)
+        for elem in processChain {
+            guard let handler = elem as? CoreMIDINoteHandler else {
+                continue
+            }
+            handler.noteOff(note)
+        }
     }
     
     func nextSample() -> CoreFloat {
-        sample = voice.nextSample()
+        var sample = voice.nextSample()
         for processor in processChain {
             sample = processor.process(sample)
         }

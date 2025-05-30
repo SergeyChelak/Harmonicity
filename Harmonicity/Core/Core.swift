@@ -38,7 +38,8 @@ protocol CoreOscillatorFactory {
 }
 
 protocol CoreVoice: CoreSampleSource, CoreMIDINoteHandler {
-    var isPlaying: Bool { get }
+    var state: VoiceState { get }
+    func canPlay(_ note: MidiNote) -> Bool
 }
 
 protocol CoreMonoVoice: CoreVoice {
@@ -48,4 +49,31 @@ protocol CoreMonoVoice: CoreVoice {
 protocol CoreMIDINoteHandler {
     func noteOn(_ note: MidiNote)
     func noteOff(_ note: MidiNote)
+}
+
+enum VoiceState {
+    case idle
+    case play
+    case release
+    
+    var isPlaying: Bool {
+        if case(.play) = self {
+            return true
+        }
+        return false
+    }
+    
+    var isReleasing: Bool {
+        if case(.release) = self {
+            return true
+        }
+        return false
+    }
+    
+    var isIdle: Bool {
+        if case(.idle) = self {
+            return true
+        }
+        return false
+    }
 }
