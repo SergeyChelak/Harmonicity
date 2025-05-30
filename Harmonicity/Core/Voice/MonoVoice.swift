@@ -1,26 +1,24 @@
 //
-//  MixedVoice.swift
+//  MonoVoice.swift
 //  Harmonicity
 //
-//  Created by Sergey on 29.05.2025.
+//  Created by Sergey on 30.05.2025.
 //
 
 import Foundation
 
-class MixedVoice: CoreMonoVoice {
-    private let oscillators: [CoreOscillator]
+class MonoVoice: CoreMonoVoice {
+    private let oscillator: CoreOscillator
     private var amplitude: CoreFloat = 0.0
-    
     private(set) var state: VoiceState = .idle
     private(set) var noteNumber: MidiNoteNumber = .max
-    
     private var releaseTime: CoreFloat
     
     init(
-        oscillators: [CoreOscillator],
+        oscillator: CoreOscillator,
         releaseTime: CoreFloat = 0.0
     ) {
-        self.oscillators = oscillators
+        self.oscillator = oscillator
         self.releaseTime = releaseTime
     }
     
@@ -34,10 +32,7 @@ class MixedVoice: CoreMonoVoice {
         self.amplitude = velocity
         self.noteNumber = note.note
         let freq = 440.0 * pow(2.0, (CoreFloat(note.note) - 69.0) / 12.0)
-//        print("Voice frequency: \(freq)")
-        oscillators.forEach {
-            $0.setFrequency(freq)
-        }
+        oscillator.setFrequency(freq)
     }
     
     func noteOff(_ note: MidiNote) {
@@ -46,9 +41,8 @@ class MixedVoice: CoreMonoVoice {
             return
         }
         state = .release
-    
-        // sound forever
         if releaseTime < 0.0 {
+            // sound forever
             return
         }
         let durationMs = Int(releaseTime * 1000)
@@ -60,16 +54,17 @@ class MixedVoice: CoreMonoVoice {
     }
     
     private func reset() {
+        guard state.isReleasing else {
+            return
+        }
         state = .idle
         self.amplitude = 0
     }
-        
+    
     func nextSample() -> CoreFloat {
         if state.isIdle {
             return 0.0
         }
-        return amplitude * oscillators
-            .map { $0.nextSample() }
-            .reduce(0.0) { $0 + $1 } / CoreFloat(oscillators.count)
+        return amplitude * oscillator.nextSample()
     }
 }

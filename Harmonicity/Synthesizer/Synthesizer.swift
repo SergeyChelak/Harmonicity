@@ -44,7 +44,7 @@ struct Synthesizer {
         let sineOscillator = oscillatorFactory.oscillator(SineWaveForm())
         let squareOscillator = oscillatorFactory.oscillator(SquareWaveForm())
         
-        let multiVoice = MixedVoice(
+        let mainOscillator = ComposedOscillator(
             oscillators: [
                 sawtoothOscillator,
                 DetunedOscillator(
@@ -55,8 +55,13 @@ struct Synthesizer {
                     oscillator: squareOscillator,
                     detune: -5
                 )
-            ],
-            releaseTime: -0.1)
+            ]
+        )
+        
+        let monoVoice = MonoVoice(
+            oscillator: mainOscillator,
+            releaseTime: -0.1
+        )
         
         let lowPassFilter = LowPassFilter(
             sampleRate: sampleRate,
@@ -67,7 +72,7 @@ struct Synthesizer {
             releaseTime: 0.3
         )
         
-        let voiceChain = VoiceChain(voice: multiVoice)
+        let voiceChain = VoiceChain(voice: monoVoice)
         voiceChain.chain(lowPassFilter)
         voiceChain.chain(envelopeFilter)
         return voiceChain
