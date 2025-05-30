@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		A5769CCA2DEA551200121875 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = A5769CC92DEA551200121875 /* Atomics */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		A5CEB7432DE5E594009802EB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A5769CCA2DEA551200121875 /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +77,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A5769CC82DEA551200121875 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A5CEB7282DE5E593009802EB = {
 			isa = PBXGroup;
 			children = (
 				A5CEB7332DE5E593009802EB /* Harmonicity */,
 				A5CEB7452DE5E594009802EB /* HarmonicityTests */,
 				A5CEB74F2DE5E594009802EB /* HarmonicityUITests */,
+				A5769CC82DEA551200121875 /* Frameworks */,
 				A5CEB7322DE5E593009802EB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -112,6 +125,7 @@
 			);
 			name = Harmonicity;
 			packageProductDependencies = (
+				A5769CC92DEA551200121875 /* Atomics */,
 			);
 			productName = Harmonicity;
 			productReference = A5CEB7312DE5E593009802EB /* Harmonicity.app */;
@@ -195,6 +209,9 @@
 			);
 			mainGroup = A5CEB7282DE5E593009802EB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A5CEBAC82DEA53E4009802EB /* XCRemoteSwiftPackageReference "swift-atomics" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A5CEB7322DE5E593009802EB /* Products */;
 			projectDirPath = "";
@@ -583,6 +600,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A5CEBAC82DEA53E4009802EB /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-atomics.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A5769CC92DEA551200121875 /* Atomics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5CEBAC82DEA53E4009802EB /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			productName = Atomics;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A5CEB7292DE5E593009802EB /* Project object */;
 }

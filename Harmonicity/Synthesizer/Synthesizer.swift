@@ -46,15 +46,16 @@ struct Synthesizer {
         
         let mainOscillator = ComposedOscillator(
             oscillators: [
-                sawtoothOscillator,
-                DetunedOscillator(
-                    oscillator: sineOscillator,
-                    detune: 5
-                ),
-                DetunedOscillator(
-                    oscillator: squareOscillator,
-                    detune: -5
-                )
+                sineOscillator
+//                sawtoothOscillator,
+//                DetunedOscillator(
+//                    oscillator: sineOscillator,
+//                    detune: 5
+//                ),
+//                DetunedOscillator(
+//                    oscillator: squareOscillator,
+//                    detune: -5
+//                )
             ]
         )
         

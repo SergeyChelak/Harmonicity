@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Dispatch
+import Atomics
 
 class WaveOscillator: CoreOscillator {
     private let sampleRate: CoreFloat
@@ -13,6 +15,9 @@ class WaveOscillator: CoreOscillator {
     
     private var phase: CoreFloat = 0.0
     private var delta: CoreFloat = 0.0
+    
+    private var isLocked = ManagedAtomic<Bool>(false)
+    private var sample: CoreFloat = 0.0
     
     // cache
     private let range: Range<CoreFloat>
@@ -24,13 +29,20 @@ class WaveOscillator: CoreOscillator {
     }
     
     func setFrequency(_ frequency: CoreFloat) {
-        // TODO: commented for single voice that produces clip after frequency change
-        self.phase = range.lowerBound
-        self.delta = range.length * frequency / sampleRate
+        isLocked.store(true, ordering: .relaxed)
+        let newDelta = range.length * frequency / sampleRate
+        if abs(newDelta - delta) > 1e-10 {
+            self.phase = range.lowerBound
+            self.delta = newDelta
+        }
+        isLocked.store(false, ordering: .relaxed)
     }
     
     func nextSample() -> CoreFloat {
-        let sample = waveForm.value(phase)
+        if isLocked.load(ordering: .relaxed) {
+            return sample
+        }
+        sample = waveForm.value(phase)
         phase += delta
         if phase >= range.upperBound {
             phase = range.lowerBound
