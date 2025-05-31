@@ -32,6 +32,7 @@ func composeContext() throws -> Context {
     
     let commandCenter = MidiCommandCenter()
     let midiInput = MidiInputService(commandCenter)
+    try midiInput.setup()
     
     let factory = WaveOscillatorFactory(
         sampleRate: engine.sampleRate

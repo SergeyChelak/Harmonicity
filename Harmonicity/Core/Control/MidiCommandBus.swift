@@ -35,6 +35,9 @@ class MidiCommandBus {
         case .noteOff(let channel, let note):
             guard channel == 0 else { break }
             noteSubscribers.forEach { $0.noteOff(note) }
+            
+        case .controlChange(let channel, let data):
+            break
         }
     }
 }

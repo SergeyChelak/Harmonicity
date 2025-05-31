@@ -8,6 +8,11 @@
 import CoreMIDI
 import Foundation
 
+enum MidiInputServiceError: Error {
+    case clientSetupFailed(OSStatus)
+    case inputPortSetupFailed(OSStatus)
+}
+
 final class MidiInputService {
     private var midiClient = MIDIClientRef()
     private var midiInputPort = MIDIPortRef()
@@ -15,16 +20,20 @@ final class MidiInputService {
     
     init(_ commandCenter: MidiCommandCenter) {
         self.commandCenter = commandCenter
-        setupMIDIClient()
-        setupMIDIInputPort()
+    }
+    
+    func setup() throws {
+        try setupMIDIClient()
+        try setupMIDIInputPort()
         findAndConnectMIDISources()
     }
         
-    /// Sets up the CoreMIDI client.
-    private func setupMIDIClient() {
+    private func setupMIDIClient() throws {
         let clientName = "MIDIKeyboardReaderClient" as CFString
-        let status = MIDIClientCreateWithBlock(clientName, &midiClient) { notification in
-            // Handle MIDI notifications (e.g., device added/removed)
+        let status = MIDIClientCreateWithBlock(clientName, &midiClient) { [weak self] notification in
+            guard let self else {
+                return
+            }
             let messageId = notification.pointee.messageID
             switch messageId {
             case .msgObjectAdded:
@@ -37,25 +46,23 @@ final class MidiInputService {
                 break
             }
         }
-        
         guard status == noErr else {
-            print("Error creating MIDI client: \(status)")
-            return
+            throw MidiInputServiceError.clientSetupFailed(status)
         }
         print("MIDI Client created successfully.")
     }
     
     /// Sets up the CoreMIDI input port to receive messages.
-    private func setupMIDIInputPort() {
+    private func setupMIDIInputPort() throws {
         let portName = "MIDIKeyboardInputPort" as CFString
-        let status = MIDIInputPortCreateWithBlock(midiClient, portName, &midiInputPort) { packetList, srcConnRefCon in
-            // This is the MIDIReadBlock where incoming MIDI messages are processed.
+        let status = MIDIInputPortCreateWithBlock(midiClient, portName, &midiInputPort) { [weak self] packetList, srcConnRefCon in
+            guard let self else {
+                return
+            }
             self.processMIDIPacketList(packetList: packetList)
         }
-        
         guard status == noErr else {
-            print("Error creating MIDI input port: \(status)")
-            return
+            throw MidiInputServiceError.inputPortSetupFailed(status)
         }
         print("MIDI Input Port created successfully.")
     }
@@ -99,7 +106,9 @@ final class MidiInputService {
     /// Processes a single `MIDIPacket`.
     /// This function extracts MIDI messages from the packet data.
     private func processMIDIPacket(packet: MIDIPacket) {
-        let data = Mirror(reflecting: packet.data).children.map { $0.value as! UInt8 }
+        let data = Mirror(reflecting: packet.data)
+            .children
+            .map { $0.value as! UInt8 }
         // The actual number of bytes in the packet is `packet.length`.
         let midiBytes = data[0..<Int(packet.length)]
         
@@ -115,14 +124,7 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
-                    if velocity > 0 {
-                        print("Note On: Channel \(channel), Note \(note), Velocity \(velocity)")
-                        commandCenter.on(note: note, velocity: velocity, channel: channel)
-                    } else {
-                        // Velocity 0 is often used as Note Off
-                        print(">>>>>>>> Note Off: Channel \(channel), Note \(note), Velocity \(velocity) (implicit)")
-                        commandCenter.off(note: note, velocity: velocity, channel: channel)
-                    }
+                    commandCenter.on(note: note, velocity: velocity, channel: channel)
                     i += 3 // Note On/Off messages are 3 bytes
                 } else {
                     print("Incomplete Note On/Off message.")
@@ -132,7 +134,6 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let note = midiBytes[i + 1]
                     let velocity = midiBytes[i + 2]
-                    print("Note Off: Channel \(channel), Note \(note), Velocity \(velocity)")
                     commandCenter.off(note: note, velocity: velocity, channel: channel)
                     i += 3
                 } else {
@@ -143,7 +144,7 @@ final class MidiInputService {
                 if i + 2 < midiBytes.count {
                     let controllerNumber = midiBytes[i + 1]
                     let controllerValue = midiBytes[i + 2]
-                    print("Control Change: Channel \(channel), Controller \(controllerNumber), Value \(controllerValue)")
+                    commandCenter.controlChange(control: controllerNumber, value: controllerValue, channel: channel)
                     i += 3
                 } else {
                     print("Incomplete Control Change message.")

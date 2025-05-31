@@ -15,7 +15,7 @@ final class MidiCommandCenter {
         eventPublisher.eraseToAnyPublisher()
     }
     
-    func on(note: MidiNoteNumber, velocity: MidiVelocity, channel: MidiChannel) {
+    func on(note: MidiValue, velocity: MidiValue, channel: MidiChannel) {
         let value = MidiNote(
             note: note,
             velocity: velocity
@@ -23,11 +23,15 @@ final class MidiCommandCenter {
         eventPublisher.send(.noteOn(channel, value))
     }
     
-    func off(note: MidiNoteNumber, velocity: MidiVelocity, channel: MidiChannel) {
+    func off(note: MidiValue, velocity: MidiValue, channel: MidiChannel) {
         let value = MidiNote(
             note: note,
             velocity: velocity
         )
         eventPublisher.send(.noteOff(channel, value))
+    }
+    
+    func controlChange(control: MidiValue, value: MidiValue, channel: MidiChannel) {
+        fatalError()
     }
 }

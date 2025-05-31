@@ -7,16 +7,24 @@
 
 import Foundation
 
-typealias MidiChannel = UInt8
-typealias MidiNoteNumber = UInt8
-typealias MidiVelocity = UInt8
+typealias MidiValue = UInt8
+typealias MidiChannel = MidiValue
+typealias MidiNoteNumber = MidiValue
+typealias MidiVelocity = MidiValue
+typealias MidiController = MidiValue
 
 enum MidiCommand {
     case noteOn(MidiChannel, MidiNote)
     case noteOff(MidiChannel, MidiNote)
+    case controlChange(MidiChannel, MidiControlChangeData)
+}
+
+struct MidiControlChangeData {
+    let controller: MidiController
+    let value: MidiValue
 }
 
 struct MidiNote {
-    let note: MidiNoteNumber
-    let velocity: MidiVelocity
+    let note: MidiValue
+    let velocity: MidiValue
 }
