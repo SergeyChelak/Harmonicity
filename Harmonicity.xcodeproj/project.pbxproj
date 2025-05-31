@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A5769CCA2DEA551200121875 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = A5769CC92DEA551200121875 /* Atomics */; };
+		A5769CCD2DEA64EA00121875 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = A5769CCC2DEA64EA00121875 /* Atomics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,7 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A5769CCA2DEA551200121875 /* Atomics in Frameworks */,
+				A5769CCD2DEA64EA00121875 /* Atomics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,7 +125,7 @@
 			);
 			name = Harmonicity;
 			packageProductDependencies = (
-				A5769CC92DEA551200121875 /* Atomics */,
+				A5769CCC2DEA64EA00121875 /* Atomics */,
 			);
 			productName = Harmonicity;
 			productReference = A5CEB7312DE5E593009802EB /* Harmonicity.app */;
@@ -210,7 +210,7 @@
 			mainGroup = A5CEB7282DE5E593009802EB;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				A5CEBAC82DEA53E4009802EB /* XCRemoteSwiftPackageReference "swift-atomics" */,
+				A5769CCB2DEA64E300121875 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A5CEB7322DE5E593009802EB /* Products */;
@@ -602,7 +602,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		A5CEBAC82DEA53E4009802EB /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
+		A5769CCB2DEA64E300121875 /* XCRemoteSwiftPackageReference "swift-atomics" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-atomics.git";
 			requirement = {
@@ -613,9 +613,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		A5769CC92DEA551200121875 /* Atomics */ = {
+		A5769CCC2DEA64EA00121875 /* Atomics */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = A5CEBAC82DEA53E4009802EB /* XCRemoteSwiftPackageReference "swift-atomics" */;
+			package = A5769CCB2DEA64E300121875 /* XCRemoteSwiftPackageReference "swift-atomics" */;
 			productName = Atomics;
 		};
 /* End XCSwiftPackageProductDependency section */

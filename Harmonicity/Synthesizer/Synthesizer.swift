@@ -46,16 +46,17 @@ struct Synthesizer {
         
         let mainOscillator = ComposedOscillator(
             oscillators: [
-                sineOscillator
+                sineOscillator,
 //                sawtoothOscillator,
-//                DetunedOscillator(
-//                    oscillator: sineOscillator,
-//                    detune: 5
-//                ),
-//                DetunedOscillator(
-//                    oscillator: squareOscillator,
-//                    detune: -5
-//                )
+//                squareOscillator
+                DetunedOscillator(
+                    oscillator: squareOscillator,
+                    detune: 5
+                ),
+                DetunedOscillator(
+                    oscillator: sawtoothOscillator,
+                    detune: -5
+                )
             ]
         )
         
@@ -70,7 +71,7 @@ struct Synthesizer {
         )
         let envelopeFilter = ADSRFilter(
             sampleRate: sampleRate,
-            releaseTime: 0.3
+            releaseTime: 0.01
         )
         
         let voiceChain = VoiceChain(voice: monoVoice)
