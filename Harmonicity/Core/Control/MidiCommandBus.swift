@@ -66,11 +66,11 @@ class MidiCommandBus {
 
         case .controlChange(let channel, let data):
             controlSubscribers
-                .compactMap { data in
-                    data.channel ?? channel == channel ? data.handler : nil
+                .filter {
+                    ($0.channel ?? channel) == channel && $0.controller == data.controller
                 }
                 .forEach {
-                    $0.controlChanged(data.controller, value: data.value)
+                    $0.handler.controlChanged(data.controller, value: data.value)
                 }
         }
     }
