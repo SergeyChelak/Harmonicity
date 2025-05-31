@@ -12,7 +12,7 @@ class MidiCommandBus {
     private var cancellable: AnyCancellable?
 
     // TODO: memory leak source
-    private var noteSubscribers: [CoreMIDINoteHandler] = []
+    private var noteSubscribers: [(CoreMIDINoteHandler, MidiChannel?)] = []
     
     init(publisher: AnyPublisher<MidiCommand, Never>) {
         cancellable = publisher
@@ -22,23 +22,32 @@ class MidiCommandBus {
             }
     }
     
-    func add(_ noteSubscriber: CoreMIDINoteHandler) {
-        noteSubscribers.append(noteSubscriber)
+    func add(_ noteSubscriber: CoreMIDINoteHandler, on channel: MidiChannel?) {
+        noteSubscribers.append((noteSubscriber, channel))
     }
     
     private func handleEvent(_ event: MidiCommand) {
         switch event {
         case .noteOn(let channel, let note):
-            guard channel == 0 else { break }
-            noteSubscribers.forEach { $0.noteOn(note) }
+            withNoteHandlers(on: channel) { $0.noteOn(note) }
             
         case .noteOff(let channel, let note):
-            guard channel == 0 else { break }
-            noteSubscribers.forEach { $0.noteOff(note) }
+            withNoteHandlers(on: channel) { $0.noteOff(note) }
 
         default: break
 //        case .controlChange(let channel, let data):
 //            break
         }
+    }
+    
+    private func withNoteHandlers(
+        on channel: MidiChannel,
+        perform action: (CoreMIDINoteHandler) -> Void
+    ) {
+        noteSubscribers
+            .compactMap { (receiver, reqChannel) in
+                reqChannel ?? channel == channel ? receiver : nil
+            }
+            .forEach(action)
     }
 }

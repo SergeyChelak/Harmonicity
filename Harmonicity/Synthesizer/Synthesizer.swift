@@ -35,7 +35,7 @@ struct Synthesizer {
         let monoVoices = (0..<voices).map { _ in constructMonoVoice(sampleRate) }
         let voice = PolyphonicVoice(voices: monoVoices)
         let voiceChain = VoiceChain(voice: voice)
-        midiEventBus.add(voiceChain)
+        midiEventBus.add(voiceChain, on: 0)
         return voiceChain
     }
     
