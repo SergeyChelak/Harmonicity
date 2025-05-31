@@ -7,29 +7,16 @@
 
 import SwiftUI
 
-//struct ContentView: View {
-//    let context: Context
-//    
-//    var body: some View {
-//        
-//    }
-//}
-
-
 struct ContentView: View {
     let context: Context
     
     var body: some View {
-        HStack(spacing: 4) {
-            ForEach(3...5, id: \.self) { octave in
-                OctaveKeyboardView(octave: octave) { note, isOn in
-                    if isOn {
-                        context.commandCenter.on(note: note.note, velocity: note.velocity, channel: 0)
-                    } else {
-                        context.commandCenter.off(note: note.note, velocity: note.velocity, channel: 0)
-                    }
-                }
-            }
+        VStack(spacing: 4) {
+            KeyboardView(
+                octaves: 3..<6,
+                midiChannel: 0,
+                commandCenter: context.commandCenter
+            )
         }
         .padding()
     }

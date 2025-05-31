@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension OctaveKeyboardView {
+extension KeyboardView {
     typealias KeyActionCallback = (MidiNote, Bool) -> Void
     
     fileprivate enum SharedConstants {
@@ -84,7 +84,7 @@ extension OctaveKeyboardView {
 
 #Preview {
     ZStack(alignment: .top) {
-        OctaveKeyboardView.KeyView(note: .c, octave: 1) { _, _ in }
-        OctaveKeyboardView.KeyView(note: .cs, octave: 1) { _, _ in }
+        KeyboardView.KeyView(note: .c, octave: 1) { _, _ in }
+        KeyboardView.KeyView(note: .cs, octave: 1) { _, _ in }
     }
 }

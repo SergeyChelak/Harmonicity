@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension OctaveKeyboardView {
+extension KeyboardView {
     enum Note: Int, CaseIterable {
         case c
         case cs
