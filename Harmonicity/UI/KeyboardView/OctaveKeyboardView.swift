@@ -1,5 +1,5 @@
 //
-//  KeyboardView.swift
+//  OctaveKeyboardView.swift
 //  Harmonicity
 //
 //  Created by Sergey on 28.05.2025.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct KeyboardView: View {
+struct OctaveKeyboardView: View {
     private let whiteRow: [AnyView]
     private let blackRow: [AnyView]
     
@@ -47,5 +47,5 @@ struct KeyboardView: View {
 }
 
 #Preview {
-    KeyboardView(octave: 1) { _, _ in }
+    OctaveKeyboardView(octave: 1) { _, _ in }
 }
