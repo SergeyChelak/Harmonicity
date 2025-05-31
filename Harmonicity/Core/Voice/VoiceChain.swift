@@ -48,10 +48,10 @@ final class VoiceChain<T: CoreVoice>: CoreVoice {
         return sample
     }
     
-    private func noteHandlers() -> [CoreMIDINoteHandler] {
+    private func noteHandlers() -> [CoreMidiNoteHandler] {
         processChain
             .compactMap {
-                $0 as? CoreMIDINoteHandler
+                $0 as? CoreMidiNoteHandler
             }
     }
 }

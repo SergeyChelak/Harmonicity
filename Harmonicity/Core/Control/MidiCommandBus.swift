@@ -10,9 +10,22 @@ import Combine
 
 class MidiCommandBus {
     private var cancellable: AnyCancellable?
+    
+    private struct NoteHandler {
+        let channel: MidiChannel?
+        let handler: CoreMidiNoteHandler
+    }
+    
+    private struct ControlChangeHandler {
+        let channel: MidiChannel?
+        let controller: MidiController
+        let handler: CoreMidiControlChangeHandler
+    }
 
     // TODO: memory leak source
-    private var noteSubscribers: [(CoreMIDINoteHandler, MidiChannel?)] = []
+    private var noteSubscribers: [NoteHandler] = []
+    
+    private var controlSubscribers: [ControlChangeHandler] = []
     
     init(publisher: AnyPublisher<MidiCommand, Never>) {
         cancellable = publisher
@@ -22,8 +35,25 @@ class MidiCommandBus {
             }
     }
     
-    func add(_ noteSubscriber: CoreMIDINoteHandler, on channel: MidiChannel?) {
-        noteSubscribers.append((noteSubscriber, channel))
+    func add(_ handler: CoreMidiNoteHandler, on channel: MidiChannel?) {
+        let subscriber = NoteHandler(
+            channel: channel,
+            handler: handler
+        )
+        noteSubscribers.append(subscriber)
+    }
+    
+    func add(
+        _ handler: CoreMidiControlChangeHandler,
+        controller: MidiController,
+        on channel: MidiChannel?
+    ) {
+        let subscriber = ControlChangeHandler(
+            channel: channel,
+            controller: controller,
+            handler: handler
+        )
+        controlSubscribers.append(subscriber)
     }
     
     private func handleEvent(_ event: MidiCommand) {
@@ -34,19 +64,24 @@ class MidiCommandBus {
         case .noteOff(let channel, let note):
             withNoteHandlers(on: channel) { $0.noteOff(note) }
 
-        default: break
-//        case .controlChange(let channel, let data):
-//            break
+        case .controlChange(let channel, let data):
+            controlSubscribers
+                .compactMap { data in
+                    data.channel ?? channel == channel ? data.handler : nil
+                }
+                .forEach {
+                    $0.controlChanged(data.controller, value: data.value)
+                }
         }
     }
     
     private func withNoteHandlers(
         on channel: MidiChannel,
-        perform action: (CoreMIDINoteHandler) -> Void
+        perform action: (CoreMidiNoteHandler) -> Void
     ) {
         noteSubscribers
-            .compactMap { (receiver, reqChannel) in
-                reqChannel ?? channel == channel ? receiver : nil
+            .compactMap { data in
+                data.channel ?? channel == channel ? data.handler : nil
             }
             .forEach(action)
     }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class LowPassFilter: CoreProcessor, CoreMIDINoteHandler {
+final class LowPassFilter: CoreProcessor, CoreMidiNoteHandler {
     private let sampleRate: CoreFloat
     var cutoffFrequency: CoreFloat {
         didSet {

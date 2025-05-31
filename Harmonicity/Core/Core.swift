@@ -37,7 +37,7 @@ protocol CoreOscillatorFactory {
     func oscillator(_ waveForm: CoreWaveForm) -> CoreOscillator
 }
 
-protocol CoreVoice: CoreSampleSource, CoreMIDINoteHandler {
+protocol CoreVoice: CoreSampleSource, CoreMidiNoteHandler {
     var state: VoiceState { get }
     func canPlay(_ note: MidiNote) -> Bool
 }
@@ -46,9 +46,13 @@ protocol CoreMonoVoice: CoreVoice {
     var noteNumber: MidiNoteNumber { get }
 }
 
-protocol CoreMIDINoteHandler {
+protocol CoreMidiNoteHandler {
     func noteOn(_ note: MidiNote)
     func noteOff(_ note: MidiNote)
+}
+
+protocol CoreMidiControlChangeHandler {
+    func controlChanged(_ control: MidiController, value: MidiValue)
 }
 
 enum VoiceState {

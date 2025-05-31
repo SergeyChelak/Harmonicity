@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class ADSRFilter: CoreProcessor, CoreMIDINoteHandler {
+final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     private enum State {
         case idle
         case attack
