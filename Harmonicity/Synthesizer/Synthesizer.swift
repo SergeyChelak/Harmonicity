@@ -43,18 +43,20 @@ struct Synthesizer {
         let sawtoothOscillator = oscillatorFactory.oscillator(SawtoothWaveForm())
         let sineOscillator = oscillatorFactory.oscillator(SineWaveForm())
         let squareOscillator = oscillatorFactory.oscillator(SquareWaveForm())
+        let triangleOscillator = oscillatorFactory.oscillator(TriangleWaveForm())
         
         let mainOscillator = ComposedOscillator(
             oscillators: [
+                triangleOscillator,
                 sineOscillator,
-//                sawtoothOscillator,
-//                squareOscillator
+                sawtoothOscillator,
+                squareOscillator,
                 DetunedOscillator(
-                    oscillator: squareOscillator,
+                    oscillator: triangleOscillator,
                     detune: 5
                 ),
                 DetunedOscillator(
-                    oscillator: sawtoothOscillator,
+                    oscillator: triangleOscillator,
                     detune: -5
                 )
             ]

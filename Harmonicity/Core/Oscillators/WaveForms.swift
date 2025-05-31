@@ -34,23 +34,11 @@ struct SawtoothWaveForm: CoreWaveForm {
     }
 }
 
-
-/*
- enum Waveform {
-     case sine, square, sawtooth, triangle
-
-     func value(phase: Float) -> Float {
-         switch self {
-         case .sine:
-             return sin(phase)
-         case .square:
-             return sin(phase) >= 0 ? 1.0 : -1.0
-         case .sawtooth:
-             return 2.0 * (phase / (2.0 * .pi)) - 1.0
-         case .triangle:
-             return abs(4.0 * (phase / (2.0 * .pi) - floor(phase / (2.0 * .pi) + 0.5))) * 2.0 - 1.0
-         }
-     }
- }
-
- */
+struct TriangleWaveForm: CoreWaveForm {
+    func value(_ x: CoreFloat) -> CoreFloat {
+        2.0 * abs(2.0 * x - 1.0) - 1.0
+    }
+    func phaseRange() -> Range<CoreFloat> {
+        0..<1.0
+    }
+}
