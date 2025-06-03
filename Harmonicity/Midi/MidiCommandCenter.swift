@@ -32,6 +32,11 @@ final class MidiCommandCenter {
     }
     
     func controlChange(control: MidiValue, value: MidiValue, channel: MidiChannel) {
-        fatalError()
+        print("ch: \(channel) ctrl: \(control) value: \(value)")
+        let data = MidiControlChangeData(
+            controller: control,
+            value: value
+        )
+        eventPublisher.send(.controlChange(channel, data))
     }
 }
