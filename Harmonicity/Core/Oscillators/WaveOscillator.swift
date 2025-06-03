@@ -8,24 +8,15 @@
 import Foundation
 import Atomics
 
-class WaveOscillator: CoreOscillator {
-    private struct Data {
-        var phase: CoreFloat
-        var delta: CoreFloat
-        
-        static let `default` = Data(
-            phase: 0.0,
-            delta: 0.0
-        )
+class WaveOscillator: Oscillator<WaveOscillator.Data> {
+    struct Data {
+        var phase: CoreFloat = 0.0
+        var delta: CoreFloat = 0.0
     }
     
     private let sampleRate: CoreFloat
     private let waveForm: CoreWaveForm
     
-    private var data: Data = .default
-    private var pendingData: Data = .default
-    private var needsUpdate = ManagedAtomic<Bool>(false)
-
     // cache
     private let range: Range<CoreFloat>
         
@@ -33,22 +24,17 @@ class WaveOscillator: CoreOscillator {
         self.sampleRate = sampleRate
         self.waveForm = waveForm
         self.range = waveForm.phaseRange()
+        super.init(Data())
     }
     
-    func setFrequency(_ frequency: CoreFloat) {
-        pendingData.phase = range.lowerBound
-        pendingData.delta = range.length * frequency / sampleRate
-        needsUpdate.store(true, ordering: .releasing)
+    override func pendingParameters(_ frequency: CoreFloat) -> Data {
+        Data(
+            phase: range.lowerBound,
+            delta: range.length * frequency / sampleRate
+        )
     }
     
-    func nextSample() -> CoreFloat {
-        if needsUpdate.compareExchange(
-            expected: true,
-            desired: false,
-            ordering: .acquiring
-        ).exchanged {
-            data = pendingData
-        }
+    override func generateSample(_ data: inout Data) -> CoreFloat {
         let sample = waveForm.value(data.phase)
         data.phase += data.delta
         if data.phase >= range.upperBound {
