@@ -38,7 +38,6 @@ class MidiCommandBus {
             channel: channel,
             handler: WeakRef(value: handler)
         )
-        noteSubscribers = noteSubscribers.filter { $0.handler.value != nil }
         noteSubscribers.append(subscriber)
     }
     
@@ -52,8 +51,16 @@ class MidiCommandBus {
             controller: controller,
             handler: WeakRef(value: handler)
         )
-        controlSubscribers = controlSubscribers.filter { $0.handler.value != nil }
         controlSubscribers.append(subscriber)
+    }
+    
+    func cleanup() {
+        controlSubscribers = controlSubscribers.filter {
+            $0.handler.value != nil
+        }
+        noteSubscribers = noteSubscribers.filter {
+            $0.handler.value != nil
+        }
     }
     
     private func handleEvent(_ event: MidiCommand) {
