@@ -12,12 +12,39 @@ struct ContentView: View {
     
     var body: some View {
         VStack(spacing: 4) {
+            
+            VStack {
+                switcher()
+                Divider()
+                switcher()
+                Divider()
+                switcher()
+            }
+            .padding(10)
+            .background {
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(lineWidth: 4)
+                    .foregroundStyle(.yellow)
+            }
+            .frame(width: 150)
+            
+            
             KeyboardView(
                 octaves: 3..<6,
                 midiChannel: 0,
                 commandCenter: context.commandCenter
             )
         }
-        .padding()
+        .padding()        
     }
+}
+
+func switcher() -> Switcher {
+    let viewModel = SwitcherViewModel(items: [
+        .image("sawtooth-wave"),
+        .image("sine-wave"),
+        .image("square-wave"),
+        .image("triangle-wave")
+    ])
+    return Switcher(viewModel: viewModel)
 }
