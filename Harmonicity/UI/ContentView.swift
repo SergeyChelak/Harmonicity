@@ -31,7 +31,7 @@ struct ContentView: View {
             
             KeyboardView(
                 octaves: 3..<6,
-                midiChannel: 0,
+                midiChannel: virtualMidiChannel,
                 commandCenter: context.commandCenter
             )
         }
