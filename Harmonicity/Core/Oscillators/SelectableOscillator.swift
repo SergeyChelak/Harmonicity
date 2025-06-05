@@ -43,7 +43,7 @@ class SelectableOscillator: CoreOscillator {
 }
 
 extension SelectableOscillator: CoreMidiControlChangeHandler {
-    func controlChanged(_ control: MidiController, value: MidiValue) {
+    func controlChanged(_ control: MidiControllerId, value: MidiValue) {
         pendingCurrent = Int(value) % oscillators.count
         needsUpdate.store(true, ordering: .releasing)
     }

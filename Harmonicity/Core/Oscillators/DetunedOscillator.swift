@@ -44,7 +44,7 @@ final class DetunedOscillator: CoreOscillator {
 }
 
 extension DetunedOscillator: CoreMidiControlChangeHandler {
-    func controlChanged(_ control: MidiController, value: MidiValue) {
+    func controlChanged(_ control: MidiControllerId, value: MidiValue) {
         // TODO: fix this
         pendingDetune = CoreFloat(value) - CoreFloat(MidiValue.max / 2)
         needsUpdate.store(true, ordering: .releasing)

@@ -16,12 +16,12 @@ typealias MidiController = MidiValue
 enum MidiCommand {
     case noteOn(MidiChannel, MidiNote)
     case noteOff(MidiChannel, MidiNote)
-    case controlChange(MidiChannel, MidiControlChangeData)
+    case controlChange(MidiControllerId, MidiValue)
 }
 
-struct MidiControlChangeData {
+struct MidiControllerId: Hashable {
+    let channel: MidiChannel
     let controller: MidiController
-    let value: MidiValue
 }
 
 struct MidiNote {

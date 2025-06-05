@@ -33,10 +33,10 @@ final class MidiCommandCenter {
     
     func controlChange(control: MidiValue, value: MidiValue, channel: MidiChannel) {
         print("ch: \(channel) ctrl: \(control) value: \(value)")
-        let data = MidiControlChangeData(
-            controller: control,
-            value: value
+        let controlId = MidiControllerId(
+            channel: channel,
+            controller: control
         )
-        eventPublisher.send(.controlChange(channel, data))
+        eventPublisher.send(.controlChange(controlId, value))
     }
 }

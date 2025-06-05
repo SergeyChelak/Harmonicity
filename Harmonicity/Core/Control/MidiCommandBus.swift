@@ -17,8 +17,7 @@ class MidiCommandBus {
     }
     
     private struct ControlChangeHandler {
-        let channel: MidiChannel?
-        let controller: MidiController
+        let criteria: MidiControllerIdCriteria
         let handler: WeakRef<CoreMidiControlChangeHandler>
     }
 
@@ -33,7 +32,7 @@ class MidiCommandBus {
             }
     }
     
-    func add(_ handler: CoreMidiNoteHandler, on channel: MidiChannel?) {
+    func register(_ handler: CoreMidiNoteHandler, on channel: MidiChannel?) {
         let subscriber = NoteHandler(
             channel: channel,
             handler: WeakRef(value: handler)
@@ -41,14 +40,12 @@ class MidiCommandBus {
         noteSubscribers.append(subscriber)
     }
     
-    func add(
+    func register(
         _ handler: CoreMidiControlChangeHandler,
-        controller: MidiController,
-        on channel: MidiChannel?
+        criteria: MidiControllerIdCriteria
     ) {
         let subscriber = ControlChangeHandler(
-            channel: channel,
-            controller: controller,
+            criteria: criteria,
             handler: WeakRef(value: handler)
         )
         controlSubscribers.append(subscriber)
@@ -71,14 +68,8 @@ class MidiCommandBus {
         case .noteOff(let channel, let note):
             withNoteHandlers(on: channel) { $0.noteOff(note) }
 
-        case .controlChange(let channel, let data):
-            controlSubscribers
-                .filter {
-                    ($0.channel ?? channel) == channel && $0.controller == data.controller
-                }
-                .forEach {
-                    $0.handler.value?.controlChanged(data.controller, value: data.value)
-                }
+        case .controlChange(let controllerId, let value):
+            controlChange(controllerId, value)
         }
     }
     
@@ -94,5 +85,15 @@ class MidiCommandBus {
                 return data.channel ?? channel == channel ? handler : nil
             }
             .forEach(action)
+    }
+    
+    private func controlChange(_ controllerId: MidiControllerId, _ value: MidiValue) {
+        controlSubscribers
+            .filter {
+                $0.criteria.matches(controllerId)
+            }
+            .forEach {
+                $0.handler.value?.controlChanged(controllerId, value: value)
+            }
     }
 }

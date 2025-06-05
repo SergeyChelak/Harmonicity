@@ -12,15 +12,15 @@ struct SynthesizerConfiguration {
     
     var rootOscillatorsCount: Int { 3 }
     
-    var rootOscillatorSelectControllers: [MidiControllerId] {
+    var rootOscillatorSelectControllers: [MidiControllerIdCriteria] {
         [1, 2, 3].controllerId(on: virtualMidiChannel)
     }
     
-    var rootOscillatorDetuneControllers: [MidiControllerId] {
+    var rootOscillatorDetuneControllers: [MidiControllerIdCriteria] {
         [20, 21, 22].controllerId(on: virtualMidiChannel)
     }
     
-    var rootOscillatorsMixerControllers: [MidiControllerId] {
+    var rootOscillatorsMixerControllers: [MidiControllerIdCriteria] {
         [10, 11, 12].controllerId(on: virtualMidiChannel)
     }
     
@@ -37,20 +37,15 @@ struct SynthesizerConfiguration {
     }
 }
 
-struct MidiControllerId {
-    let channel: MidiChannel?
-    let controller: MidiController
-}
-
 struct EnvelopeMidiControls {
     let channel: MidiChannel
     let parameters: [(ADSRFilter.Parameter, MidiController)]
 }
 
 fileprivate extension Array where Element == MidiController {
-    func controllerId(on channel: MidiChannel?) -> [MidiControllerId] {
+    func controllerId(on channel: MidiChannel?) -> [MidiControllerIdCriteria] {
         self.map {
-            MidiControllerId(
+            MidiControllerIdCriteria(
                 channel: virtualMidiChannel,
                 controller: $0
             )

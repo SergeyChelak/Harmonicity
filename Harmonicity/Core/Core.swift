@@ -52,7 +52,7 @@ protocol CoreMidiNoteHandler {
 }
 
 protocol CoreMidiControlChangeHandler {
-    func controlChanged(_ control: MidiController, value: MidiValue)
+    func controlChanged(_ control: MidiControllerId, value: MidiValue)
 }
 
 enum VoiceState {
