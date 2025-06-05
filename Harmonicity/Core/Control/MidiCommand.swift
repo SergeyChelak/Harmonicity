@@ -28,3 +28,5 @@ struct MidiNote {
     let note: MidiValue
     let velocity: MidiValue
 }
+
+let virtualMidiChannel: MidiChannel = MidiChannel.max

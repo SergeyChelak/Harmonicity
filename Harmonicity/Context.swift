@@ -38,8 +38,10 @@ func composeContext() throws -> Context {
         sampleRate: engine.sampleRate
     )
     
+    let config = SynthesizerConfiguration()
+    
     let synthesizer = Synthesizer(
-        voices: 8,
+        configuration: config,
         engine: engine,
         commandPublisher: commandCenter.publisher,
         oscillatorFactory: factory
