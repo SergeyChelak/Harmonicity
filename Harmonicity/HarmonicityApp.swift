@@ -17,6 +17,18 @@ struct HarmonicityApp: App {
 
     @State
     private var state: HarmonicityAppState = .initial
+
+#if os(OSX)
+    init() {
+        NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            // escape
+            if event.keyCode == 53 {
+                Darwin.exit(0)
+            }
+            return event
+        }
+    }
+#endif
     
     var body: some Scene {
         WindowGroup {
