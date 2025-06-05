@@ -13,18 +13,16 @@ class MidiCommandBus {
     
     private struct NoteHandler {
         let channel: MidiChannel?
-        let handler: CoreMidiNoteHandler
+        let handler: WeakRef<CoreMidiNoteHandler>
     }
     
     private struct ControlChangeHandler {
         let channel: MidiChannel?
         let controller: MidiController
-        let handler: CoreMidiControlChangeHandler
+        let handler: WeakRef<CoreMidiControlChangeHandler>
     }
 
-    // TODO: memory leak source
     private var noteSubscribers: [NoteHandler] = []
-    
     private var controlSubscribers: [ControlChangeHandler] = []
     
     init(publisher: AnyPublisher<MidiCommand, Never>) {
@@ -38,8 +36,9 @@ class MidiCommandBus {
     func add(_ handler: CoreMidiNoteHandler, on channel: MidiChannel?) {
         let subscriber = NoteHandler(
             channel: channel,
-            handler: handler
+            handler: WeakRef(value: handler)
         )
+        noteSubscribers = noteSubscribers.filter { $0.handler.value != nil }
         noteSubscribers.append(subscriber)
     }
     
@@ -51,8 +50,9 @@ class MidiCommandBus {
         let subscriber = ControlChangeHandler(
             channel: channel,
             controller: controller,
-            handler: handler
+            handler: WeakRef(value: handler)
         )
+        controlSubscribers = controlSubscribers.filter { $0.handler.value != nil }
         controlSubscribers.append(subscriber)
     }
     
@@ -70,7 +70,7 @@ class MidiCommandBus {
                     ($0.channel ?? channel) == channel && $0.controller == data.controller
                 }
                 .forEach {
-                    $0.handler.controlChanged(data.controller, value: data.value)
+                    $0.handler.value?.controlChanged(data.controller, value: data.value)
                 }
         }
     }
@@ -81,7 +81,10 @@ class MidiCommandBus {
     ) {
         noteSubscribers
             .compactMap { data in
-                data.channel ?? channel == channel ? data.handler : nil
+                guard let handler = data.handler.value else {
+                    return nil
+                }
+                return data.channel ?? channel == channel ? handler : nil
             }
             .forEach(action)
     }
