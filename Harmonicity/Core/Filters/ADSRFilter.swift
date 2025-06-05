@@ -5,9 +5,14 @@
 //  Created by Sergey on 29.05.2025.
 //
 
+import Atomics
 import Foundation
 
 final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
+    enum Parameter: Hashable {
+        case attack, decay, sustain, release
+    }
+    
     private enum State {
         case idle
         case attack
@@ -15,13 +20,20 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         case sustain
         case release
     }
+    
+    private struct EnvelopeData {
+        var attackTime: CoreFloat
+        var decayTime: CoreFloat
+        var sustainLevel: CoreFloat
+        var releaseTime: CoreFloat
+    }
 
     // MARK: - user controlled envelope parameters
-    var attackTime: CoreFloat
-    var decayTime: CoreFloat
-    var sustainLevel: CoreFloat
-    var releaseTime: CoreFloat
-
+    private var envelopeData: EnvelopeData
+    private var pendingEnvelopeData: EnvelopeData
+    private var needsUpdate = ManagedAtomic<Bool>(false)
+    private var controlMap: [MidiController: Parameter] = [:]
+    
     // MARK: - envelope state
     private var currentState: State = .idle
     private var currentLevel: CoreFloat = 0.0    // 0.0 - 1.0
@@ -38,13 +50,18 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         releaseTime: CoreFloat = 0.2
     ) {
         self.sampleRate = sampleRate
-        self.attackTime = attackTime
-        self.decayTime = decayTime
-        self.sustainLevel = sustainLevel
-        self.releaseTime = releaseTime
+        let data = EnvelopeData(
+            attackTime: attackTime,
+            decayTime: decayTime,
+            sustainLevel: sustainLevel,
+            releaseTime: releaseTime
+        )
+        self.envelopeData = data
+        self.pendingEnvelopeData = data
     }
 
     func noteOn(_ note: MidiNote) {
+        applyUpdate()
         noteNumber = note.note
         startLevel = currentLevel
         segmentProgress = 0.0
@@ -69,6 +86,16 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         startLevel = 0.0
     }
     
+    private func applyUpdate() {
+        if needsUpdate.compareExchange(
+            expected: true,
+            desired: false,
+            ordering: .acquiring
+        ).exchanged {
+            envelopeData = pendingEnvelopeData
+        }
+    }
+    
     func process(_ sample: CoreFloat) -> CoreFloat {
         level() * sample
     }
@@ -80,7 +107,7 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
             return currentLevel
 
         case .attack:
-            let attackDurationSamples = max(1.0, attackTime * sampleRate)
+            let attackDurationSamples = max(1.0, envelopeData.attackTime * sampleRate)
             segmentProgress += 1.0 / attackDurationSamples
             // lerp form startLevel to 1.0
             currentLevel = startLevel + (1.0 - startLevel) * min(1.0, segmentProgress)
@@ -91,22 +118,22 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
             }
 
         case .decay:
-            let decayDurationSamples = max(1.0, decayTime * sampleRate)
+            let decayDurationSamples = max(1.0, envelopeData.decayTime * sampleRate)
             segmentProgress += 1.0 / decayDurationSamples
             // lerp from startLevel to sustainLevel
-            currentLevel = startLevel + (sustainLevel - startLevel) * min(1.0, segmentProgress)
+            currentLevel = startLevel + (envelopeData.sustainLevel - startLevel) * min(1.0, segmentProgress)
             
             if segmentProgress >= 1.0 {
                 currentState = .sustain
-                currentLevel = sustainLevel
+                currentLevel = envelopeData.sustainLevel
             }
 
         case .sustain:
             // constant sustain
-            currentLevel = sustainLevel
+            currentLevel = envelopeData.sustainLevel
 
         case .release:
-            let releaseDurationSamples = max(1.0, releaseTime * sampleRate)
+            let releaseDurationSamples = max(1.0, envelopeData.releaseTime * sampleRate)
             segmentProgress += 1.0 / releaseDurationSamples
 
             // lerp from startLevel to 0.0, fade to 0.0
@@ -117,5 +144,19 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
             }
         }
         return currentLevel
+    }
+    
+    func bind(parameter: Parameter, to controller: MidiController) {
+        controlMap[controller] = parameter
+    }
+}
+
+extension ADSRFilter: CoreMidiControlChangeHandler {
+    func controlChanged(_ control: MidiController, value: MidiValue) {
+        guard let param = controlMap[control] else {
+            return
+        }
+        fatalError("ADSR not updated for \(param)")
+//        needsUpdate.store(true, ordering: .releasing)
     }
 }

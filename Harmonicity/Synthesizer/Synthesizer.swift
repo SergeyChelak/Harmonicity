@@ -35,7 +35,19 @@ struct Synthesizer {
         engine?.sampleSource = source
     }
     
-    private func setupMixedOscillator() -> CoreOscillator {
+    private func constructSampleSource() -> CoreSampleSource? {
+        guard let sampleRate = engine?.sampleRate else {
+            return nil
+        }
+        let monoVoices = (0..<configuration.voices).map { _ in constructMonoVoice(sampleRate) }
+        let voice = PolyphonicVoice(voices: monoVoices)
+        let voiceChain = VoiceChain(voice: voice)
+        midiEventBus.add(voiceChain, on: 0)
+        return voiceChain
+    }
+
+    
+    private func constructMonoVoice(_ sampleRate: CoreFloat) -> CoreMonoVoice {
         let mixedOscillator = MixedOscillator()
         for oscillator in 0..<configuration.rootOscillatorsCount {
             let selectMidiControllerId = configuration.rootOscillatorSelectControllers[oscillator]
@@ -64,7 +76,22 @@ struct Synthesizer {
                 on: mixerMidiControllerId.channel
             )
         }
-        return mixedOscillator
+        
+        let monoVoice = MonoVoice(
+            oscillator: mixedOscillator,
+            releaseTime: -0.1
+        )
+        let lowPassFilter = LowPassFilter(
+            sampleRate: sampleRate,
+            cutoffFrequency: 10_000
+        )
+        
+        let envelopeFilter = envelopeFilter(sampleRate)
+        
+        let voiceChain = VoiceChain(voice: monoVoice)
+        voiceChain.chain(lowPassFilter)
+        voiceChain.chain(envelopeFilter)
+        return voiceChain
     }
     
     private func voiceOscillator(
@@ -86,37 +113,25 @@ struct Synthesizer {
         return oscillator
     }
     
-    private func constructSampleSource() -> CoreSampleSource? {
-        guard let sampleRate = engine?.sampleRate else {
-            return nil
-        }
-        let monoVoices = (0..<configuration.voices).map { _ in constructMonoVoice(sampleRate) }
-        let voice = PolyphonicVoice(voices: monoVoices)
-        let voiceChain = VoiceChain(voice: voice)
-        midiEventBus.add(voiceChain, on: 0)
-        return voiceChain
-    }
-    
-    private func constructMonoVoice(_ sampleRate: CoreFloat) -> CoreMonoVoice {
-        let mainOscillator = setupMixedOscillator()
-        
-        let monoVoice = MonoVoice(
-            oscillator: mainOscillator,
-            releaseTime: -0.1
-        )
-        
-        let lowPassFilter = LowPassFilter(
-            sampleRate: sampleRate,
-            cutoffFrequency: 10_000
-        )
+    private func envelopeFilter(
+        _ sampleRate: CoreFloat
+    ) -> ADSRFilter {
         let envelopeFilter = ADSRFilter(
             sampleRate: sampleRate,
             releaseTime: 0.01
         )
-        
-        let voiceChain = VoiceChain(voice: monoVoice)
-        voiceChain.chain(lowPassFilter)
-        voiceChain.chain(envelopeFilter)
-        return voiceChain
+        let envelopeFilterController = configuration.envelopeFilterController
+        for (param, controllerId) in envelopeFilterController.parameters {
+            envelopeFilter.bind(
+                parameter: param,
+                to: controllerId
+            )
+            midiEventBus.add(
+                envelopeFilter,
+                controller: controllerId,
+                on: envelopeFilterController.channel
+            )
+        }
+        return envelopeFilter
     }
 }

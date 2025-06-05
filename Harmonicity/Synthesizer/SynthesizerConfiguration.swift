@@ -26,10 +26,13 @@ struct SynthesizerConfiguration {
     
     var envelopeFilterController: EnvelopeMidiControls {
         EnvelopeMidiControls(
-            attackControlId: MidiControllerId(channel: virtualMidiChannel, controller: 30),
-            decayControlId: MidiControllerId(channel: virtualMidiChannel, controller: 31),
-            sustainControlId: MidiControllerId(channel: virtualMidiChannel, controller: 32),
-            releaseControlId: MidiControllerId(channel: virtualMidiChannel, controller: 33)
+            channel: virtualMidiChannel,
+            parameters: [
+                (.attack, 30),
+                (.decay, 31),
+                (.sustain, 32),
+                (.release, 33)
+            ]
         )
     }
 }
@@ -40,10 +43,8 @@ struct MidiControllerId {
 }
 
 struct EnvelopeMidiControls {
-    let attackControlId: MidiControllerId
-    let decayControlId: MidiControllerId
-    let sustainControlId: MidiControllerId
-    let releaseControlId: MidiControllerId
+    let channel: MidiChannel
+    let parameters: [(ADSRFilter.Parameter, MidiController)]
 }
 
 fileprivate extension Array where Element == MidiController {
