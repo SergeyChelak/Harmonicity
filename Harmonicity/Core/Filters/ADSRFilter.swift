@@ -6,9 +6,11 @@
 //
 
 import Atomics
+import Combine
 import Foundation
 
 final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
+    let id = UUID()
     enum Parameter: Hashable {
         case attack, decay, sustain, release
     }
@@ -21,11 +23,11 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         case release
     }
     
-    private struct EnvelopeData {
-        var attackTime: CoreFloat
-        var decayTime: CoreFloat
-        var sustainLevel: CoreFloat
-        var releaseTime: CoreFloat
+    struct EnvelopeData {
+        private(set) var attackTime: CoreFloat
+        private(set) var decayTime: CoreFloat
+        private(set) var sustainLevel: CoreFloat
+        private(set) var releaseTime: CoreFloat
     }
 
     // MARK: - user controlled envelope parameters
@@ -42,6 +44,8 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     private let sampleRate: CoreFloat
     private var noteNumber: MidiNoteNumber = .max
 
+    private let subject: CurrentValueSubject<AdsrValue, Never>
+    
     init(
         sampleRate: CoreFloat,
         attackTime: CoreFloat = 0.01,
@@ -58,6 +62,14 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         )
         self.envelopeData = data
         self.pendingEnvelopeData = data
+        
+        self.subject = CurrentValueSubject(
+            AdsrValue(sender: id, value: data)
+        )
+    }
+    
+    var publisher: AnyPublisher<AdsrValue, Never> {
+        subject.eraseToAnyPublisher()
     }
 
     func noteOn(_ note: MidiNote) {
@@ -155,6 +167,14 @@ extension ADSRFilter: CoreMidiControlChangeHandler {
     func controlChanged(_ control: MidiControllerId, value: MidiValue) {
         let nodes = controlMap.get(by: control)
         fatalError("ADSR not updated for \(nodes)")
+//        subject.send(
+//            AdsrValue(sender: id, value: pendingEnvelopeData)
+//        )
 //        needsUpdate.store(true, ordering: .releasing)
     }
+}
+
+struct AdsrValue {
+    let sender: UUID
+    let value: ADSRFilter.EnvelopeData
 }

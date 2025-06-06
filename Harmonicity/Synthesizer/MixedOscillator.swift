@@ -6,16 +6,32 @@
 //
 
 import Atomics
+import Combine
 import Foundation
 
 class MixedOscillator: CoreOscillator {
     typealias SourceIndex = Int
     
+    let id = UUID()
     private var sources: [CoreOscillator] = []
     private var weights: [CoreFloat] = []
     private var pendingWeights: [CoreFloat] = []
     private var controllerMap = MidiControllerMap<SourceIndex>()
     private var needsUpdate = ManagedAtomic<Bool>(false)
+    
+    private let subject: CurrentValueSubject<MixerValue, Never>
+    
+    init() {
+        weights = []
+        pendingWeights = []
+        subject = CurrentValueSubject(
+            MixerValue(sender: id, value: pendingWeights)
+        )
+    }
+    
+    var publisher: AnyPublisher<MixerValue, Never> {
+        subject.eraseToAnyPublisher()
+    }
     
     func addSource(
         _ source: CoreOscillator,
@@ -71,6 +87,14 @@ extension MixedOscillator: CoreMidiControlChangeHandler {
         }
         assert(channels.count == 1)
         channels.forEach { pendingWeights[$0] = CoreFloat(value) }
+        subject.send(
+            MixerValue(sender: id, value: pendingWeights)
+        )
         needsUpdate.store(true, ordering: .releasing)
     }
+}
+
+struct MixerValue {
+    let sender: UUID
+    let value: [CoreFloat]
 }
