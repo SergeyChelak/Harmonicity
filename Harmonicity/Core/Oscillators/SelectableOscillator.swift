@@ -40,11 +40,9 @@ class SelectableOscillator: CoreOscillator {
             current = pendingCurrent
         }
     }
-}
-
-extension SelectableOscillator: CoreMidiControlChangeHandler {
-    func controlChanged(_ control: MidiControllerId, value: MidiValue) {
-        pendingCurrent = Int(value) % oscillators.count
+    
+    func setCurrent(_ index: Int) {
+        pendingCurrent = index
         needsUpdate.store(true, ordering: .releasing)
     }
 }

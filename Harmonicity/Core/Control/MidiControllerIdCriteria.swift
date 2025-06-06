@@ -31,17 +31,3 @@ struct MidiControllerIdCriteria: Hashable {
         return true
     }
 }
-
-struct MidiControllerMap<T> {
-    private var storage: [(MidiControllerIdCriteria, T)] = []
-    
-    mutating func insert(criteria: MidiControllerIdCriteria, _ value: T) {
-        storage.append((criteria, value))
-    }
-        
-    func get(by controllerId: MidiControllerId) -> [T] {
-        storage
-            .filter { (criteria, _) in criteria.matches(controllerId) }
-            .map { (_, value) in value }
-    }
-}

@@ -50,26 +50,14 @@ struct Synthesizer {
     
     private func constructMonoVoice(_ sampleRate: CoreFloat) -> CoreMonoVoice {
         let mixedOscillator = MixedOscillator()
-        for oscillator in 0..<configuration.rootOscillatorsCount {
-            let selectMidiControllerId = configuration.rootOscillatorSelectControllers[oscillator]
-            let voice = voiceOscillator(criteria: selectMidiControllerId)
+        for _ in 0..<configuration.rootOscillatorsCount {
+            let voice = voiceOscillator()
             
             let detunedOscillator = DetunedOscillator(
                 oscillator: voice
             )
-            let detuneMidiControllerId = configuration.rootOscillatorDetuneControllers[oscillator]
-            midiEventBus.register(
-                detunedOscillator,
-                criteria: detuneMidiControllerId
-            )
-                        
-            let id = mixedOscillator.addSource(detunedOscillator)
-            let mixerMidiControllerCriteria = configuration.rootOscillatorsMixerControllers[oscillator]
-            mixedOscillator.bind(criteria: mixerMidiControllerCriteria, source: id)
-            midiEventBus.register(
-                mixedOscillator,
-                criteria: mixerMidiControllerCriteria
-            )
+                                    
+            _ = mixedOscillator.addSource(detunedOscillator)
         }
         
         let monoVoice = MonoVoice(
@@ -89,9 +77,7 @@ struct Synthesizer {
         return voiceChain
     }
     
-    private func voiceOscillator(
-        criteria: MidiControllerIdCriteria
-    ) -> CoreOscillator {
+    private func voiceOscillator() -> CoreOscillator {
         let oscillators = configuration.waveForms
             .map {
                 oscillatorFactory.oscillator($0.instance())
@@ -100,8 +86,6 @@ struct Synthesizer {
             oscillators: oscillators,
             current: 0
         )
-        // register select oscillator control
-        midiEventBus.register(oscillator, criteria: criteria)
         return oscillator
     }
     
@@ -112,21 +96,6 @@ struct Synthesizer {
             sampleRate: sampleRate,
             releaseTime: 0.01
         )
-        let envelopeFilterController = configuration.envelopeFilterController
-        for (param, controllerId) in envelopeFilterController.parameters {
-            let criteria = MidiControllerIdCriteria(
-                channel: envelopeFilterController.channel,
-                controller: controllerId
-            )
-            envelopeFilter.bind(
-                criteria: criteria,
-                parameter: param
-            )
-            midiEventBus.register(
-                envelopeFilter,
-                criteria: criteria
-            )
-        }
         return envelopeFilter
     }
 }

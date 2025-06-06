@@ -33,7 +33,6 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     private var envelopeData: EnvelopeData
     private var pendingEnvelopeData: EnvelopeData
     private var needsUpdate = ManagedAtomic<Bool>(false)
-    private var controlMap = MidiControllerMap<Parameter>()
     
     // MARK: - envelope state
     private var currentState: State = .idle
@@ -146,16 +145,11 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         }
         return currentLevel
     }
-    
-    func bind(criteria: MidiControllerIdCriteria, parameter: Parameter) {
-        controlMap.insert(criteria: criteria, parameter)
-    }
 }
 
 extension ADSRFilter: CoreMidiControlChangeHandler {
     func controlChanged(_ control: MidiControllerId, value: MidiValue) {
-        let nodes = controlMap.get(by: control)
-        fatalError("ADSR not updated for \(nodes)")
+        fatalError("ADSR not updated")
 //        needsUpdate.store(true, ordering: .releasing)
     }
 }

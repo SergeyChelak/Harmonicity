@@ -14,7 +14,6 @@ class MixedOscillator: CoreOscillator {
     private var sources: [CoreOscillator] = []
     private var weights: [CoreFloat] = []
     private var pendingWeights: [CoreFloat] = []
-    private var controllerMap = MidiControllerMap<SourceIndex>()
     private var needsUpdate = ManagedAtomic<Bool>(false)
 
     init() {
@@ -33,11 +32,7 @@ class MixedOscillator: CoreOscillator {
         sources.append(source)
         return sourceId
     }
-    
-    func bind(criteria: MidiControllerIdCriteria, source: SourceIndex) {
-        controllerMap.insert(criteria: criteria, source)
-    }
-    
+        
     func setFrequency(_ frequency: CoreFloat) {
         sources.forEach {
             $0.setFrequency(frequency)
@@ -64,18 +59,10 @@ class MixedOscillator: CoreOscillator {
         ).exchanged {
             weights = pendingWeights
         }
-
     }
-}
-
-extension MixedOscillator: CoreMidiControlChangeHandler {
-    func controlChanged(_ control: MidiControllerId, value: MidiValue) {
-        let channels = controllerMap.get(by: control)
-        if channels.isEmpty {
-            return
-        }
-        assert(channels.count == 1)
-        channels.forEach { pendingWeights[$0] = CoreFloat(value) }
+    
+    func setWeights(_ val: [CoreFloat]) {
+        pendingWeights = val
         needsUpdate.store(true, ordering: .releasing)
     }
 }
