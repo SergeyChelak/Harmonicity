@@ -23,10 +23,10 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     }
     
     struct EnvelopeData {
-        private(set) var attackTime: CoreFloat
-        private(set) var decayTime: CoreFloat
-        private(set) var sustainLevel: CoreFloat
-        private(set) var releaseTime: CoreFloat
+        var attackTime: CoreFloat = 0.01
+        var decayTime: CoreFloat = 0.1
+        var sustainLevel: CoreFloat = 0.7
+        var releaseTime: CoreFloat = 0.01
     }
 
     // MARK: - user controlled envelope parameters
@@ -44,20 +44,11 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     
     init(
         sampleRate: CoreFloat,
-        attackTime: CoreFloat = 0.01,
-        decayTime: CoreFloat = 0.1,
-        sustainLevel: CoreFloat = 0.7,
-        releaseTime: CoreFloat = 0.2
+        envelope: EnvelopeData
     ) {
         self.sampleRate = sampleRate
-        let data = EnvelopeData(
-            attackTime: attackTime,
-            decayTime: decayTime,
-            sustainLevel: sustainLevel,
-            releaseTime: releaseTime
-        )
-        self.envelopeData = data
-        self.pendingEnvelopeData = data        
+        self.envelopeData = envelope
+        self.pendingEnvelopeData = envelope
     }
 
     func noteOn(_ note: MidiNote) {
@@ -145,11 +136,9 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         }
         return currentLevel
     }
-}
 
-extension ADSRFilter: CoreMidiControlChangeHandler {
-    func controlChanged(_ control: MidiControllerId, value: MidiValue) {
-        fatalError("ADSR not updated")
-//        needsUpdate.store(true, ordering: .releasing)
+    func setEnvelope(_ envelope: EnvelopeData) {
+        pendingEnvelopeData = envelope
+        needsUpdate.store(true, ordering: .releasing)
     }
 }

@@ -1,5 +1,5 @@
 //
-//  SelectableOscillatorState.swift
+//  DetunedOscillatorState.swift
 //  Harmonicity
 //
 //  Created by Sergey on 07.06.2025.
@@ -7,17 +7,15 @@
 
 import Foundation
 
-class SelectableOscillatorState: MidiControllableState<SelectableOscillatorState.State, SelectableOscillator> {
-    typealias State = Int
-    private let maxValue: State
+class DetunedOscillatorState: MidiControllableState<DetunedOscillatorState.State, DetunedOscillator> {
+    typealias State = CoreFloat
     private let controllerId: MidiControllerId
     
     init(
-        initial: State, maxValue: State,
+        initial: State,
         channel: MidiChannel,
         controller: MidiController
     ) {
-        self.maxValue = maxValue
         self.controllerId = MidiControllerId(
             channel: channel,
             controller: controller
@@ -30,10 +28,11 @@ class SelectableOscillatorState: MidiControllableState<SelectableOscillatorState
     }
     
     override func map(_ controllerId: MidiControllerId, midiValue: MidiValue, stored: State) -> State? {
-        State(midiValue) % maxValue
+        // TODO: this is a bullshit
+        CoreFloat(midiValue) - CoreFloat(MidiValue.max / 2)
     }
     
-    override func update(_ obj: SelectableOscillator, with value: State) {
-        obj.setCurrent(value)
+    override func update(_ obj: DetunedOscillator, with value: State) {
+        obj.setDetune(value)
     }
 }

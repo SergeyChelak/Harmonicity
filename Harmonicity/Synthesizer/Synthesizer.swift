@@ -94,7 +94,7 @@ struct Synthesizer {
     ) -> ADSRFilter {
         let envelopeFilter = ADSRFilter(
             sampleRate: sampleRate,
-            releaseTime: 0.01
+            envelope: .init()
         )
         return envelopeFilter
     }

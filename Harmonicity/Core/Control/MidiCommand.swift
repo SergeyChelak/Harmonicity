@@ -30,3 +30,4 @@ struct MidiNote {
 }
 
 let virtualMidiChannel: MidiChannel = MidiChannel.max
+let maxMidiValue: MidiValue = 127
