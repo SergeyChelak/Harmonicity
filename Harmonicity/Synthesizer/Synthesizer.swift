@@ -39,11 +39,12 @@ struct Synthesizer {
         guard let sampleRate = engine?.sampleRate else {
             return nil
         }
-        let monoVoices = (0..<configuration.voices).map { _ in constructMonoVoice(sampleRate) }
+        let monoVoices = (0..<configuration.voices).map {
+            _ in constructMonoVoice(sampleRate)
+        }
         let voice = PolyphonicVoice(voices: monoVoices)
-        let voiceChain = VoiceChain(voice: voice)
-        midiEventBus.register(voiceChain, on: nil)
-        return voiceChain
+        midiEventBus.register(voice, on: nil)
+        return voice
     }
 
     
