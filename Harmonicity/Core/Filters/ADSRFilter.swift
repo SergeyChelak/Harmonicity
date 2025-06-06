@@ -6,7 +6,6 @@
 //
 
 import Atomics
-import Combine
 import Foundation
 
 final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
@@ -43,8 +42,6 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     private var startLevel: CoreFloat = 0.0
     private let sampleRate: CoreFloat
     private var noteNumber: MidiNoteNumber = .max
-
-    private let subject: CurrentValueSubject<AdsrValue, Never>
     
     init(
         sampleRate: CoreFloat,
@@ -61,15 +58,7 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
             releaseTime: releaseTime
         )
         self.envelopeData = data
-        self.pendingEnvelopeData = data
-        
-        self.subject = CurrentValueSubject(
-            AdsrValue(sender: id, value: data)
-        )
-    }
-    
-    var publisher: AnyPublisher<AdsrValue, Never> {
-        subject.eraseToAnyPublisher()
+        self.pendingEnvelopeData = data        
     }
 
     func noteOn(_ note: MidiNote) {
@@ -167,14 +156,6 @@ extension ADSRFilter: CoreMidiControlChangeHandler {
     func controlChanged(_ control: MidiControllerId, value: MidiValue) {
         let nodes = controlMap.get(by: control)
         fatalError("ADSR not updated for \(nodes)")
-//        subject.send(
-//            AdsrValue(sender: id, value: pendingEnvelopeData)
-//        )
 //        needsUpdate.store(true, ordering: .releasing)
     }
-}
-
-struct AdsrValue {
-    let sender: UUID
-    let value: ADSRFilter.EnvelopeData
 }

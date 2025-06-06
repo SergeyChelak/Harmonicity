@@ -6,29 +6,18 @@
 //
 
 import Atomics
-import Combine
 import Foundation
 
 final class DetunedOscillator: CoreOscillator {
-    let id = UUID()
     let oscillator: CoreOscillator
     private var detune: CoreFloat
     private var pendingDetune: CoreFloat
     private var needsUpdate = ManagedAtomic<Bool>(false)
     
-    private let subject: CurrentValueSubject<DetuneValue, Never>
-    
     init(oscillator: CoreOscillator, detune: CoreFloat = 0.0) {
         self.oscillator = oscillator
         self.detune = detune
         self.pendingDetune = detune
-        self.subject = CurrentValueSubject(
-            DetuneValue(sender: id, midiValue: 0, value: detune)
-        )
-    }
-    
-    var publisher: AnyPublisher<DetuneValue, Never> {
-        subject.eraseToAnyPublisher()
     }
     
     func setFrequency(_ frequency: CoreFloat) {
@@ -57,15 +46,6 @@ extension DetunedOscillator: CoreMidiControlChangeHandler {
     func controlChanged(_ control: MidiControllerId, value: MidiValue) {
         // TODO: fix this
         pendingDetune = CoreFloat(value) - CoreFloat(MidiValue.max / 2)
-        subject.send(
-            DetuneValue(sender: id, midiValue: value, value: pendingDetune)
-        )
         needsUpdate.store(true, ordering: .releasing)
     }
-}
-
-struct DetuneValue {
-    let sender: UUID
-    let midiValue: MidiValue
-    let value: CoreFloat
 }
