@@ -8,11 +8,15 @@
 import Combine
 import Foundation
 
-struct Synthesizer {
-    private let midiEventBus: MidiCommandBus
+final class Synthesizer {
+    private var cancellable: AnyCancellable?
+    
     private let oscillatorFactory: CoreOscillatorFactory
-    private weak var engine: AudioEngine?
+    private let engine: AudioEngine
     private let configuration: SynthesizerConfiguration
+    
+    private var voice: CoreVoice?
+    private var controlSubscribers: [CoreMidiControlChangeHandler] = []
     
     init(
         configuration: SynthesizerConfiguration,
@@ -22,28 +26,48 @@ struct Synthesizer {
     ) {
         self.configuration = configuration
         self.engine = engine
-        self.midiEventBus = MidiCommandBus(
-            publisher: commandPublisher
-        )
         self.oscillatorFactory = oscillatorFactory
+        
+        cancellable = commandPublisher
+            .receive(on: DispatchQueue.global(qos: .userInitiated))
+            .sink { [weak self] event in
+                self?.handleEvent(event)
+            }
     }
     
-    func reconfigure() {
-        guard let source = constructSampleSource() else {
-            return
+    private func handleEvent(_ event: MidiCommand) {
+        switch event {
+        case .noteOn(_, let note):
+            voice?.noteOn(note)
+            
+        case .noteOff(_, let note):
+            voice?.noteOff(note)
+
+        case .controlChange(let controllerId, let value):
+            controlSubscribers.forEach {
+                $0.controlChanged(controllerId, value: value)
+            }
         }
-        engine?.sampleSource = source
     }
     
-    private func constructSampleSource() -> CoreSampleSource? {
-        guard let sampleRate = engine?.sampleRate else {
-            return nil
-        }
+    func configure() {
+    }
+    
+    func reconfigure() throws {
+        engine.stop()
+        let source = constructSampleSource()
+        engine.sampleSource = source
+        try engine.setup()
+        try engine.start()
+    }
+    
+    private func constructSampleSource() -> CoreSampleSource {
+        let sampleRate = engine.sampleRate
         let monoVoices = (0..<configuration.voices).map {
             _ in constructMonoVoice(sampleRate)
         }
         let voice = PolyphonicVoice(voices: monoVoices)
-        midiEventBus.register(voice, on: nil)
+        self.voice = voice
         return voice
     }
 

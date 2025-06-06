@@ -8,18 +8,15 @@
 import Foundation
 
 final class Context {
-    let engine: AudioEngine
     let midiInput: MidiInputService
     let commandCenter: MidiCommandCenter
     let synthesizer: Synthesizer
     
     init(
-        engine: AudioEngine,
         midiInput: MidiInputService,
         commandCenter: MidiCommandCenter,
         synthesizer: Synthesizer
     ) {
-        self.engine = engine
         self.midiInput = midiInput
         self.commandCenter = commandCenter
         self.synthesizer = synthesizer
@@ -28,7 +25,6 @@ final class Context {
 
 func composeContext() throws -> Context {
     let engine = AudioEngine()
-    try engine.setup()
     
     let commandCenter = MidiCommandCenter()
     let midiInput = MidiInputService(commandCenter)
@@ -46,10 +42,9 @@ func composeContext() throws -> Context {
         commandPublisher: commandCenter.publisher,
         oscillatorFactory: factory
     )
-    synthesizer.reconfigure()
+    try synthesizer.reconfigure()
     
     let context = Context(
-        engine: engine,
         midiInput: midiInput,
         commandCenter: commandCenter,
         synthesizer: synthesizer

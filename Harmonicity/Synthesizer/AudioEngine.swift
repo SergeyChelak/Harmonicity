@@ -18,7 +18,7 @@ final class AudioEngine {
     var sampleSource: CoreSampleSource?
         
     deinit {
-        audioEngine.stop()
+        stop()
     }
     
     var sampleRate: CoreFloat {
@@ -59,13 +59,19 @@ final class AudioEngine {
             to: audioEngine.outputNode,
             format: inputFormat
         )
-
+    }
+    
+    func start() throws {
         audioEngine.prepare()
         do {
             try audioEngine.start()
         } catch {
             throw AudioEngineError.engineStartFailed(error)
         }
+    }
+    
+    func stop() {
+        audioEngine.stop()
     }
 }
 
