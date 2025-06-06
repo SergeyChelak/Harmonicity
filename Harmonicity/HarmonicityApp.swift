@@ -55,7 +55,7 @@ struct HarmonicityApp: App {
         case .initial:
             Text("Loading...")
         case .ready(let context):
-            ContentView(context: context)
+            SynthesizerView(context: context)
         case .error(let error):
             Text(error.localizedDescription)
         }

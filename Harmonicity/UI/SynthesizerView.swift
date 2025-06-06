@@ -1,5 +1,5 @@
 //
-//  ContentView.swift
+//  SynthesizerView.swift
 //  Harmonicity
 //
 //  Created by Sergey on 27.05.2025.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct SynthesizerView: View {
     let context: Context
     
     var body: some View {
