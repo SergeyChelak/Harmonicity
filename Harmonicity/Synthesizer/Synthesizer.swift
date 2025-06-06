@@ -91,12 +91,10 @@ struct Synthesizer {
     private func voiceOscillator(
         criteria: MidiControllerIdCriteria
     ) -> CoreOscillator {
-        let oscillators = [
-            oscillatorFactory.oscillator(SineWaveForm()),
-            oscillatorFactory.oscillator(SawtoothWaveForm()),
-            oscillatorFactory.oscillator(SquareWaveForm()),
-            oscillatorFactory.oscillator(TriangleWaveForm())
-        ]
+        let oscillators = configuration.waveForms
+            .map {
+                oscillatorFactory.oscillator($0.instance())
+            }
         let oscillator = SelectableOscillator(
             oscillators: oscillators,
             current: 0

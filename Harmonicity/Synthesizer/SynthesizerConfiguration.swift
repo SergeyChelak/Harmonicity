@@ -12,6 +12,10 @@ struct SynthesizerConfiguration {
     
     var rootOscillatorsCount: Int { 3 }
     
+    var waveForms: [KnownWaveForm] {
+        [.sine, .sawtooth, .triangle, .square]
+    }
+    
     var rootOscillatorSelectControllers: [MidiControllerIdCriteria] {
         [1, 2, 3].controllerId(on: virtualMidiChannel)
     }
@@ -36,6 +40,29 @@ struct SynthesizerConfiguration {
         )
     }
 }
+
+enum KnownWaveForm {
+    case sine, square, triangle, sawtooth
+    
+    func instance() -> CoreWaveForm {
+        switch self {
+        case .sine:
+            Self.sineWaveForm
+        case .square:
+            Self.squareWaveForm
+        case .triangle:
+            Self.triangleWaveForm
+        case .sawtooth:
+            Self.sawtoothWaveForm
+        }
+    }
+    
+    private static let sineWaveForm = SineWaveForm()
+    private static let squareWaveForm = SquareWaveForm()
+    private static let triangleWaveForm = TriangleWaveForm()
+    private static let sawtoothWaveForm = SawtoothWaveForm()
+}
+
 
 struct EnvelopeMidiControls {
     let channel: MidiChannel
