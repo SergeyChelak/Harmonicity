@@ -35,12 +35,20 @@ func composeContext() throws -> Context {
     )
     
     let config = Configuration(channel: virtualMidiChannel)
+    let midiStates = MidiControllerStates(config: config)
+    
+    let composer = VoiceComposer(
+        sampleRate: engine.sampleRate,
+        oscillatorFactory: factory,
+        midiStates: midiStates,
+        config: config
+    )
     
     let synthesizer = Synthesizer(
-        configuration: config,
+        voice: composer.voice(),
         engine: engine,
-        commandPublisher: commandCenter.publisher,
-        oscillatorFactory: factory
+        midiStates: midiStates,
+        commandPublisher: commandCenter.publisher
     )
     try synthesizer.start()
     

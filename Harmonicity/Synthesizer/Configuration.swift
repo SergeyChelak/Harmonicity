@@ -25,7 +25,7 @@ final class Configuration {
         3
     }
     
-    var availableWaveForms: [KnownWaveForm] {
+    var availableWaveForms: [WaveForm] {
         [.sine, .sawtooth, .triangle, .square]
     }
     
@@ -49,6 +49,16 @@ final class Configuration {
     
     var mixerOscillatorControls: MixerControllerIds {
         let controllers = (0..<oscillatorsPerVoice).map {
+            ControlOffset.mixer.rawValue + MidiController($0)
+        }
+        return MixerControllerIds(
+            channel: channel,
+            controllers: controllers
+        )
+    }
+    
+    var envelopeFilterControls: MixerControllerIds {
+        let controllers = (0..<4).map {
             ControlOffset.envelope.rawValue + MidiController($0)
         }
         return MixerControllerIds(
@@ -65,26 +75,27 @@ final class Configuration {
         let channel: MidiChannel
         let controllers: [MidiController]
     }
-}
-
-enum KnownWaveForm {
-    case sine, square, triangle, sawtooth
     
-    private static let sineWaveForm = SineWaveForm()
-    private static let squareWaveForm = SquareWaveForm()
-    private static let triangleWaveForm = TriangleWaveForm()
-    private static let sawtoothWaveForm = SawtoothWaveForm()
-    
-    func instance() -> CoreWaveForm {
-        switch self {
-        case .sine:
-            Self.sineWaveForm
-        case .square:
-            Self.squareWaveForm
-        case .triangle:
-            Self.triangleWaveForm
-        case .sawtooth:
-            Self.sawtoothWaveForm
+    enum WaveForm {
+        case sine, square, triangle, sawtooth
+        
+        private static let sineWaveForm = SineWaveForm()
+        private static let squareWaveForm = SquareWaveForm()
+        private static let triangleWaveForm = TriangleWaveForm()
+        private static let sawtoothWaveForm = SawtoothWaveForm()
+        
+        func instance() -> CoreWaveForm {
+            switch self {
+            case .sine:
+                Self.sineWaveForm
+            case .square:
+                Self.squareWaveForm
+            case .triangle:
+                Self.triangleWaveForm
+            case .sawtooth:
+                Self.sawtoothWaveForm
+            }
         }
     }
+
 }

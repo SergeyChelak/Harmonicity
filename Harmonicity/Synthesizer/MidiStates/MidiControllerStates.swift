@@ -11,6 +11,7 @@ final class MidiControllerStates {
     let selectableOscillatorStates: [SelectableOscillatorState]
     let detunedOscillatorStates: [DetunedOscillatorState]
     let mixerOscillatorState: MixerOscillatorState
+    let envelopeFilterState: EnvelopeFilterState
     
     init(config: Configuration) {
         // ----
@@ -38,6 +39,17 @@ final class MidiControllerStates {
             initial: defaultMixWeights,
             channel: mixerOscillatorControls.channel,
             controllers: mixerOscillatorControls.controllers
+        )
+        
+        // ---
+        let envelopeFilterControls = config.envelopeFilterControls
+        envelopeFilterState = EnvelopeFilterState(
+            initial: .init(),
+            channel: envelopeFilterControls.channel,
+            attackCtrl: envelopeFilterControls.controllers[0],
+            decayCtrl: envelopeFilterControls.controllers[1],
+            sustainCtrl: envelopeFilterControls.controllers[2],
+            releaseCtrl: envelopeFilterControls.controllers[3]
         )
     }
 }
