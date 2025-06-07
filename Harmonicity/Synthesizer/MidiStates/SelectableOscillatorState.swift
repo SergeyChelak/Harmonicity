@@ -10,7 +10,7 @@ import Foundation
 class SelectableOscillatorState: MidiControllableState<SelectableOscillatorState.State, SelectableOscillator> {
     typealias State = Int
     let waveForms: [Configuration.WaveForm]
-    private let controllerId: MidiControllerId
+    let controllerId: MidiControllerId
     
     init(
         initial: State,

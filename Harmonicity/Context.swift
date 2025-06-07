@@ -12,20 +12,17 @@ final class Context {
     let commandCenter: MidiCommandCenter
     private let synthesizer: Synthesizer
     let midiStates: MidiControllerStates
-    let config: Configuration
     
     init(
         midiInput: MidiInputService,
         commandCenter: MidiCommandCenter,
         synthesizer: Synthesizer,
-        midiStates: MidiControllerStates,
-        config: Configuration
+        midiStates: MidiControllerStates
     ) {
         self.midiInput = midiInput
         self.commandCenter = commandCenter
         self.synthesizer = synthesizer
         self.midiStates = midiStates
-        self.config = config
     }
 }
 
@@ -62,8 +59,7 @@ func composeContext() throws -> Context {
         midiInput: midiInput,
         commandCenter: commandCenter,
         synthesizer: synthesizer,
-        midiStates: midiStates,
-        config: config
+        midiStates: midiStates
     )
     
     return context

@@ -12,13 +12,9 @@ struct OscillatorSelectorView: View {
     @ObservedObject private var viewModel: OscillatorSelectorViewModel
     
     init(
-        state: SelectableOscillatorState,
-        controllerId: MidiControllerId
+        state: SelectableOscillatorState
     ) {
-        viewModel = OscillatorSelectorViewModel(
-            state: state,
-            controllerId: controllerId
-        )
+        viewModel = OscillatorSelectorViewModel(state: state)
     }
     
     var body: some View {
@@ -36,17 +32,14 @@ struct OscillatorSelectorView: View {
 class OscillatorSelectorViewModel: ObservableObject {
     private var cancellable: AnyCancellable?
     private let state: SelectableOscillatorState
-    private let controllerId: MidiControllerId
     
     @Published private(set) var selected: Int
     
     init(
-        state: SelectableOscillatorState,
-        controllerId: MidiControllerId
+        state: SelectableOscillatorState
     ) {
         self.state = state
         self.selected = state.storedValue
-        self.controllerId = controllerId
         self.cancellable = state.publisher.sink { [weak self] in
             self?.selected = $0
         }
@@ -84,7 +77,7 @@ class OscillatorSelectorViewModel: ObservableObject {
     
     func changeSelection(_ newValue: Int) {
         let value = MidiValue(newValue)
-        state.controlChanged(controllerId, value: value)
+        state.controlChanged(state.controllerId, value: value)
     }
 }
 
@@ -95,5 +88,5 @@ class OscillatorSelectorViewModel: ObservableObject {
         waveForms: [.sine, .triangle, .sawtooth, .square],
         controllerId: controllerId
     )
-    return OscillatorSelectorView(state: state, controllerId: controllerId)
+    return OscillatorSelectorView(state: state)
 }

@@ -12,10 +12,16 @@ struct SynthesizerView: View {
     
     var body: some View {
         VStack(spacing: 4) {
-            OscillatorSelectorGroupView(
-                states: context.midiStates.selectableOscillatorStates,
-                controllerIds: context.config.selectableOscillatorControl
-            )
+            
+            HStack(spacing: 16) {
+                OscillatorSelectorGroupView(
+                    states: context.midiStates.selectableOscillatorStates
+                )
+                
+                DetuneControlGroupView(
+                    states: context.midiStates.detunedOscillatorStates
+                )
+            }
             
             KeyboardView(
                 octaves: 3..<6,

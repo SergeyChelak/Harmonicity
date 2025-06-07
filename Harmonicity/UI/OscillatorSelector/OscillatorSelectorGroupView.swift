@@ -9,15 +9,9 @@ import SwiftUI
 
 struct OscillatorSelectorGroupView: View {
     private let states: [SelectableOscillatorState]
-    private let controllerIds: [MidiControllerId]
     
-    init(
-        states: [SelectableOscillatorState],
-        controllerIds: [MidiControllerId]
-    ) {
-        assert(states.count == controllerIds.count)
+    init(states: [SelectableOscillatorState]) {
         self.states = states
-        self.controllerIds = controllerIds
     }
     
     var body: some View {
@@ -27,8 +21,7 @@ struct OscillatorSelectorGroupView: View {
                 .padding(.bottom, 10)
             ForEach(states.indices, id: \.self) { index in
                 OscillatorSelectorView(
-                    state: states[index],
-                    controllerId: controllerIds[index]
+                    state: states[index]
                 )
                 if index < states.count - 1 {
                     Divider()
@@ -36,8 +29,7 @@ struct OscillatorSelectorGroupView: View {
             }
         }
         .groupStyle()
-        .frame(width: 150)
-
+        .frame(width: 250)
     }
 }
 
@@ -50,7 +42,6 @@ struct OscillatorSelectorGroupView: View {
     )
     
     OscillatorSelectorGroupView(
-        states: [state, state, state],
-        controllerIds: [controllerId, controllerId, controllerId]
+        states: [state, state, state]
     )
 }
