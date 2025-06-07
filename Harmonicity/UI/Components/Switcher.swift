@@ -13,8 +13,20 @@ enum SwitcherContent {
 }
 
 struct Switcher: View {
-    @ObservedObject var viewModel: SwitcherViewModel
+    @ObservedObject private var viewModel: SwitcherViewModel
     
+    init(
+        items: [SwitcherContent],
+        selected: Int = 0,
+        handler: @escaping (Int) -> Void
+    ) {
+        viewModel = SwitcherViewModel(
+            items: items,
+            selected: selected,
+            handler: handler
+        )
+    }
+        
     var body: some View {
         HStack(spacing: 8) {
             button(
@@ -46,15 +58,40 @@ struct Switcher: View {
     }
 }
 
+struct SwitcherContentView: View {
+    let item: SwitcherContent
+    
+    var body: some View {
+        switch item {
+        case .text(let string):
+            Text(string)
+                .font(.title)
+                .foregroundStyle(.red)
+        case .image(let string):
+            Image(string)
+        }
+    }
+}
+
 
 class SwitcherViewModel: ObservableObject {
     private(set) var items: [SwitcherContent]
-    @Published private(set) var current: Int
+    private let handler: (Int) -> Void
+    @Published private(set) var current: Int {
+        didSet {
+            handler(current)
+        }
+    }
     
-    init(items: [SwitcherContent]) {
+    init(
+        items: [SwitcherContent],
+        selected: Int,
+        handler: @escaping (Int) -> Void
+    ) {
         assert(!items.isEmpty)
         self.items = items
-        self.current = 0
+        self.current = selected
+        self.handler = handler
     }
     
     var selectedItem: SwitcherContent {
@@ -72,27 +109,10 @@ class SwitcherViewModel: ObservableObject {
     }
 }
 
-
-struct SwitcherContentView: View {
-    let item: SwitcherContent
-    
-    var body: some View {
-        switch item {
-        case .text(let string):
-            Text(string)
-                .font(.title)
-                .foregroundStyle(.red)
-        case .image(let string):
-            Image(string)
-        }
-    }
-}
-
 #Preview {
-    let viewModel = SwitcherViewModel(items: [
+    Switcher(items: [
         .text("Large Hall"),
         .text("Cathedral"),
         .text("Small Room")
-    ])
-    return Switcher(viewModel: viewModel)
+    ]) { _ in }
 }

@@ -18,7 +18,7 @@ final class MidiControllerStates {
         selectableOscillatorStates = config.selectableOscillatorControl.map {
             SelectableOscillatorState(
                 initial: 0,
-                maxValue: config.availableWaveForms.count,
+                waveForms: config.availableWaveForms,
                 controllerId: $0
             )
         }

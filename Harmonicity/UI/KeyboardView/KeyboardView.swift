@@ -10,16 +10,16 @@ import SwiftUI
 struct KeyboardView: View {
     let octaves: Range<Int>
     let midiChannel: MidiChannel
-    let commandCenter: MidiCommandCenter?
+    let commandCenter: MidiCommandCenter
     
     var body: some View {
         HStack(spacing: 4) {
             ForEach(octaves, id: \.self) { octave in
                 OctaveKeyboardView(octave: octave) { note, isOn in
                     if isOn {
-                        commandCenter?.on(note: note.note, velocity: note.velocity, channel: midiChannel)
+                        commandCenter.on(note: note.note, velocity: note.velocity, channel: midiChannel)
                     } else {
-                        commandCenter?.off(note: note.note, velocity: note.velocity, channel: midiChannel)
+                        commandCenter.off(note: note.note, velocity: note.velocity, channel: midiChannel)
                     }
                 }
             }
@@ -32,6 +32,6 @@ struct KeyboardView: View {
     KeyboardView(
         octaves: 3..<6,
         midiChannel: 0,
-        commandCenter: nil
+        commandCenter: MidiCommandCenter()
     )
 }

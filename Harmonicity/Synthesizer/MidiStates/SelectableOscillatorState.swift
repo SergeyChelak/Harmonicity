@@ -9,15 +9,15 @@ import Foundation
 
 class SelectableOscillatorState: MidiControllableState<SelectableOscillatorState.State, SelectableOscillator> {
     typealias State = Int
-    private let maxValue: State
+    let waveForms: [Configuration.WaveForm]
     private let controllerId: MidiControllerId
     
     init(
         initial: State,
-        maxValue: State,
+        waveForms: [Configuration.WaveForm],
         controllerId: MidiControllerId
     ) {
-        self.maxValue = maxValue
+        self.waveForms = waveForms
         self.controllerId = controllerId
         super.init(initial: initial)
     }
@@ -27,7 +27,7 @@ class SelectableOscillatorState: MidiControllableState<SelectableOscillatorState
     }
     
     override func map(_ controllerId: MidiControllerId, midiValue: MidiValue, stored: State) -> State? {
-        State(midiValue) % maxValue
+        State(midiValue) % waveForms.count
     }
     
     override func update(_ obj: SelectableOscillator, with value: State) {
