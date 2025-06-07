@@ -12,18 +12,18 @@ final class Synthesizer {
     private var cancellable: AnyCancellable?
     
     private let engine: AudioEngine
-    let midiStates: MidiControllerStates
+    let controlHandler: CoreMidiControlChangeHandler
     private let voice: CoreVoice
         
     init(
         voice: CoreVoice,
         engine: AudioEngine,
-        midiStates: MidiControllerStates,
+        controlHandler: CoreMidiControlChangeHandler,
         commandPublisher: AnyPublisher<MidiCommand, Never>
     ) {
         self.voice = voice
         self.engine = engine
-        self.midiStates = midiStates
+        self.controlHandler = controlHandler
         setupObservables(commandPublisher: commandPublisher)
     }
         
@@ -52,7 +52,7 @@ final class Synthesizer {
             voice.noteOff(note)
 
         case .controlChange(let controllerId, let value):
-            midiStates.controlChanged(controllerId, value: value)
+            controlHandler.controlChanged(controllerId, value: value)
         }
     }
 }
