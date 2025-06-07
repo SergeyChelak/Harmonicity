@@ -55,7 +55,8 @@ struct SwitcherView: View {
         Button(action: action) {
             Image(imageName)
                 .renderingMode(.template)
-                .foregroundStyle(.green)
+                .foregroundStyle(.blue)
+                .padding(2)
         }
     }
 }

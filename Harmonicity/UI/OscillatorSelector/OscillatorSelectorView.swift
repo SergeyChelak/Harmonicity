@@ -88,6 +88,12 @@ class OscillatorSelectorViewModel: ObservableObject {
     }
 }
 
-//#Preview {
-//    OscillatorSelectorView(states: [])
-//}
+#Preview {
+    let controllerId = MidiControllerId(channel: 0, controller: 0)
+    let state = SelectableOscillatorState(
+        initial: 0,
+        waveForms: [.sine, .triangle, .sawtooth, .square],
+        controllerId: controllerId
+    )
+    return OscillatorSelectorView(state: state, controllerId: controllerId)
+}

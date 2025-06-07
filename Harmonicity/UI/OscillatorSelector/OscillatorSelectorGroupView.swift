@@ -35,12 +35,7 @@ struct OscillatorSelectorGroupView: View {
                 }
             }
         }
-        .padding(10)
-        .background {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(lineWidth: 4)
-                .foregroundStyle(.yellow)
-        }
+        .groupStyle()
         .frame(width: 150)
 
     }
