@@ -9,7 +9,7 @@ import Foundation
 
 class DetunedOscillatorState: MidiControllableState<DetunedOscillatorState.State, DetunedOscillator> {
     typealias State = CoreFloat
-    private let controllerId: MidiControllerId
+    let controllerId: MidiControllerId
     
     init(
         initial: State,
@@ -24,11 +24,14 @@ class DetunedOscillatorState: MidiControllableState<DetunedOscillatorState.State
     }
     
     override func map(_ controllerId: MidiControllerId, midiValue: MidiValue, stored: State) -> State? {
-        // TODO: this is a bullshit
-        CoreFloat(midiValue) - CoreFloat(MidiValue.max / 2)
+        convertFromMidi(midiValue, toValueFrom: detuneRange)
     }
     
     override func update(_ obj: DetunedOscillator, with value: State) {
         obj.setDetune(value)
+    }
+    
+    var detuneRange: Range<CoreFloat> {
+        -24.0..<24.0
     }
 }

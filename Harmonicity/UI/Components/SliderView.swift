@@ -8,33 +8,34 @@
 import SwiftUI
 
 typealias SliderChangeHandler = (MidiValue) -> Void
+typealias SliderValueFormatter = (MidiValue) -> String
 
 struct SliderView: View {
     @ObservedObject var viewModel: SliderViewModel
+    private let formatter: SliderValueFormatter
     
     init(
         _ initialValue: CoreFloat,
-        destinationRange: Range<CoreFloat>,
+        formatter: @escaping SliderValueFormatter = defaultSliderValueFormatter,
         handler: @escaping SliderChangeHandler
     ) {
-        viewModel = SliderViewModel(
+        self.viewModel = SliderViewModel(
             value: initialValue,
-            destinationRange: destinationRange,
             handler: handler
         )
+        self.formatter = formatter
     }
     
     var body: some View {
         VStack {
             Slider(value: $viewModel.midiValue, in: viewModel.range)
-            Text(String(viewModel.formattedValue))
+            Text(formatter(MidiValue(viewModel.midiValue)))
         }
     }
 }
 
 final class SliderViewModel: ObservableObject {
     let range = 0...Double(maxMidiValue)
-    private let destinationRange: Range<CoreFloat>
     private let handler: SliderChangeHandler
     @Published var midiValue: Double {
         didSet {
@@ -45,21 +46,20 @@ final class SliderViewModel: ObservableObject {
     
     init(
         value: Double,
-        destinationRange: Range<CoreFloat>,
         handler: @escaping SliderChangeHandler
     ) {
-        self.midiValue = Double(convertToMidi(value, from: destinationRange))
-        self.destinationRange = destinationRange
+        self.midiValue = value
         self.handler = handler
     }
     
-    var formattedValue: String {
-        String(Int(midiValue))
-    }
+}
+
+fileprivate func defaultSliderValueFormatter(_ value: MidiValue) -> String {
+    "Midi \(Int(value))"
 }
 
 #Preview {
-    SliderView(0, destinationRange: 0..<100.0) { _ in
+    SliderView(0) { _ in
         // no op
     }
 }

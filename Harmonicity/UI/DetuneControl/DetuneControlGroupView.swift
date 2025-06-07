@@ -20,7 +20,7 @@ struct DetuneControlGroupView: View {
                 .font(.title)
                 .padding(.bottom, 10)
             ForEach(states.indices, id: \.self) { index in
-                DetuneControlView()
+                DetuneControlView(state: states[index])
                 if index < states.count - 1 {
                     Divider()
                 }
