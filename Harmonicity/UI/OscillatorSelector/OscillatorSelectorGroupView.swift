@@ -44,8 +44,15 @@ struct OscillatorSelectorGroupView: View {
 }
 
 #Preview {
+    let controllerId = MidiControllerId(channel: 0, controller: 0)
+    let state = SelectableOscillatorState(
+        initial: 0,
+        waveForms: [.sine, .triangle, .sawtooth, .square],
+        controllerId: controllerId
+    )
+    
     OscillatorSelectorGroupView(
-        states: [],
-        controllerIds: []
+        states: [state, state, state],
+        controllerIds: [controllerId, controllerId, controllerId]
     )
 }

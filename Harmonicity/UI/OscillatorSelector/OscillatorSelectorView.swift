@@ -22,11 +22,14 @@ struct OscillatorSelectorView: View {
     }
     
     var body: some View {
-        SwitcherView(
-            items: viewModel.items,
-            selected: viewModel.selected,
-            handler: viewModel.changeSelection(_:)
-        )
+        VStack {
+            Text(viewModel.title)
+            SwitcherView(
+                items: viewModel.items,
+                selected: viewModel.selected,
+                handler: viewModel.changeSelection(_:)
+            )
+        }
     }
 }
 
@@ -47,6 +50,21 @@ class OscillatorSelectorViewModel: ObservableObject {
         self.cancellable = state.publisher.sink { [weak self] in
             self?.selected = $0
         }
+    }
+    
+    var title: String {
+        let waveForm = state.waveForms[selected]
+        let waveName = switch waveForm {
+        case .sine:
+            "Sine"
+        case .square:
+            "Square"
+        case .triangle:
+            "Triangle"
+        case .sawtooth:
+            "Sawtooth"
+        }
+        return "\(waveName) Oscillator"
     }
     
     var items: [SwitcherContent] {
