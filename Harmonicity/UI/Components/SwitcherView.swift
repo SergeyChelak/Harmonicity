@@ -1,5 +1,5 @@
 //
-//  Switcher.swift
+//  SwitcherView.swift
 //  Harmonicity
 //
 //  Created by Sergey on 04.06.2025.
@@ -12,7 +12,7 @@ enum SwitcherContent {
     case image(String)
 }
 
-struct Switcher: View {
+struct SwitcherView: View {
     @ObservedObject private var viewModel: SwitcherViewModel
     
     init(
@@ -110,7 +110,7 @@ class SwitcherViewModel: ObservableObject {
 }
 
 #Preview {
-    Switcher(items: [
+    SwitcherView(items: [
         .text("Large Hall"),
         .text("Cathedral"),
         .text("Small Room")

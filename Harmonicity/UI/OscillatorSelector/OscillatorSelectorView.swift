@@ -22,7 +22,7 @@ struct OscillatorSelectorView: View {
     }
     
     var body: some View {
-        Switcher(
+        SwitcherView(
             items: viewModel.items,
             selected: viewModel.selected,
             handler: viewModel.changeSelection(_:)
