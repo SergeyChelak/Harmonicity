@@ -22,6 +22,9 @@ struct OscillatorSelectorGroupView: View {
     
     var body: some View {
         VStack {
+            Text("Voice")
+                .font(.title)
+                .padding(.bottom, 10)
             ForEach(states.indices, id: \.self) { index in
                 OscillatorSelectorView(
                     state: states[index],

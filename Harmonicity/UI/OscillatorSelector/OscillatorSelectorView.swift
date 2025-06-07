@@ -54,7 +54,7 @@ class OscillatorSelectorViewModel: ObservableObject {
     
     var title: String {
         let waveForm = state.waveForms[selected]
-        let waveName = switch waveForm {
+        return switch waveForm {
         case .sine:
             "Sine"
         case .square:
@@ -64,7 +64,6 @@ class OscillatorSelectorViewModel: ObservableObject {
         case .sawtooth:
             "Sawtooth"
         }
-        return "\(waveName) Oscillator"
     }
     
     var items: [SwitcherContent] {
