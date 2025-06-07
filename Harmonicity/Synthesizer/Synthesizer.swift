@@ -11,52 +11,61 @@ import Foundation
 final class Synthesizer {
     private var cancellable: AnyCancellable?
     
-    private let oscillatorFactory: CoreOscillatorFactory
     private let engine: AudioEngine
-    private let configuration: SynthesizerConfiguration
-    
-    private var voice: CoreVoice?
-    private var controlSubscribers: [CoreMidiControlChangeHandler] = []
-    
+    let midiStates: MidiControllerStates
+    private var voice: CoreVoice
+        
     init(
-        configuration: SynthesizerConfiguration,
+        configuration: Configuration,
         engine: AudioEngine,
         commandPublisher: AnyPublisher<MidiCommand, Never>,
         oscillatorFactory: CoreOscillatorFactory
     ) {
-        self.configuration = configuration
         self.engine = engine
-        self.oscillatorFactory = oscillatorFactory
+        let midiStates = MidiControllerStates(config: configuration)
+        let composer = VoiceComposer(
+            sampleRate: engine.sampleRate,
+            oscillatorFactory: oscillatorFactory,
+            midiStates: midiStates,
+            config: configuration)
+        self.voice = composer.voice()
+        self.midiStates = midiStates
+        setupObservables(commandPublisher: commandPublisher)
+    }
         
+    func start() throws {
+        engine.stop()
+        engine.sampleSource = voice
+        try engine.setup()
+        try engine.start()
+    }
+            
+    // MARK: -- handle midi events
+    private func setupObservables(commandPublisher: AnyPublisher<MidiCommand, Never>) {
         cancellable = commandPublisher
             .receive(on: DispatchQueue.global(qos: .userInitiated))
             .sink { [weak self] event in
                 self?.handleEvent(event)
             }
     }
-    
+        
     private func handleEvent(_ event: MidiCommand) {
         switch event {
         case .noteOn(_, let note):
-            voice?.noteOn(note)
+            voice.noteOn(note)
             
         case .noteOff(_, let note):
-            voice?.noteOff(note)
+            voice.noteOff(note)
 
         case .controlChange(let controllerId, let value):
-            controlSubscribers.forEach {
-                $0.controlChanged(controllerId, value: value)
-            }
+            midiStates.controlChanged(controllerId, value: value)
         }
     }
-    
-    func configure() {
-    }
-    
+/*
     func reconfigure() throws {
-        engine.stop()
         let source = constructSampleSource()
         engine.sampleSource = source
+        engine.stop()
         try engine.setup()
         try engine.start()
     }
@@ -121,5 +130,71 @@ final class Synthesizer {
             envelope: .init()
         )
         return envelopeFilter
+    }
+ */
+}
+
+struct VoiceComposer {
+    let sampleRate: CoreFloat
+    let oscillatorFactory: CoreOscillatorFactory
+    let midiStates: MidiControllerStates
+    let config: Configuration
+    
+    func voice() -> CoreVoice {
+        let monoVoices = (0..<config.voices)
+            .map { _ in
+                composeMonoVoice()
+            }
+        return PolyphonicVoice(voices: monoVoices)
+    }
+    
+    private func composeMonoVoice() -> CoreMonoVoice {
+        let mixedOscillator = composeMixedOscillator()
+        
+        let monoVoice = MonoVoice(
+            oscillator: mixedOscillator,
+            releaseTime: -0.1
+        )
+        
+        let voiceChain = VoiceChain(voice: monoVoice)
+        // TODO: add low pass & envelope filter
+        return voiceChain
+    }
+    
+    private func composeMixedOscillator() -> CoreOscillator {
+        let weights = midiStates.mixerOscillatorState.storedValue
+        let oscillators = (0..<weights.count).map {
+            composeDetunedOscillator(index: $0)
+        }
+        let oscillator = MixedOscillator(
+            oscillators: oscillators,
+            weights: weights
+        )
+        midiStates.mixerOscillatorState.addSubscriber(oscillator)
+        return oscillator
+    }
+    
+    private func composeDetunedOscillator(index: Int) -> CoreOscillator {
+        let inner = composeSelectableOscillator(index: index)
+        let oscillator = DetunedOscillator(
+            oscillator: inner,
+            detune: midiStates.detunedOscillatorStates[index].storedValue
+        )
+        midiStates.detunedOscillatorStates[index].addSubscriber(oscillator)
+        return oscillator
+    }
+    
+    private func composeSelectableOscillator(index: Int) -> CoreOscillator {
+        let oscillators = config
+            .availableWaveForms
+            .map {
+                oscillatorFactory.oscillator($0.instance())
+            }
+        let oscillator = SelectableOscillator(
+            oscillators: oscillators,
+            current: midiStates.selectableOscillatorStates[index].storedValue
+        )
+        midiStates.selectableOscillatorStates[index].addSubscriber(oscillator)
+        return oscillator
     }
 }

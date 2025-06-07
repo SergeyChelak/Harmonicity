@@ -13,15 +13,12 @@ class SelectableOscillatorState: MidiControllableState<SelectableOscillatorState
     private let controllerId: MidiControllerId
     
     init(
-        initial: State, maxValue: State,
-        channel: MidiChannel,
-        controller: MidiController
+        initial: State,
+        maxValue: State,
+        controllerId: MidiControllerId
     ) {
         self.maxValue = maxValue
-        self.controllerId = MidiControllerId(
-            channel: channel,
-            controller: controller
-        )
+        self.controllerId = controllerId
         super.init(initial: initial)
     }
     

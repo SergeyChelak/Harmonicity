@@ -15,7 +15,7 @@ class MidiControllableState<T, S: AnyObject>: CoreMidiControlChangeHandler {
     }
     private var subscribers: [WeakRef<S>] = []
     
-    private var storedValue: T
+    private(set) var storedValue: T
     
     init(
         initial: T

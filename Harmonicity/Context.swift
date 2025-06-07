@@ -34,7 +34,7 @@ func composeContext() throws -> Context {
         sampleRate: engine.sampleRate
     )
     
-    let config = SynthesizerConfiguration()
+    let config = Configuration(channel: virtualMidiChannel)
     
     let synthesizer = Synthesizer(
         configuration: config,
@@ -42,7 +42,7 @@ func composeContext() throws -> Context {
         commandPublisher: commandCenter.publisher,
         oscillatorFactory: factory
     )
-    try synthesizer.reconfigure()
+    try synthesizer.start()
     
     let context = Context(
         midiInput: midiInput,

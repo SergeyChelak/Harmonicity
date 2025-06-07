@@ -11,28 +11,20 @@ import Foundation
 class MixedOscillator: CoreOscillator {
     typealias SourceIndex = Int
 
-    private var sources: [CoreOscillator] = []
-    private var weights: [CoreFloat] = []
-    private var pendingWeights: [CoreFloat] = []
+    private var sources: [CoreOscillator]
+    private var weights: [CoreFloat]
+    private var pendingWeights: [CoreFloat]
     private var needsUpdate = ManagedAtomic<Bool>(false)
 
-    init() {
-        weights = []
-        pendingWeights = []
+    init(
+        oscillators: [CoreOscillator],
+        weights: [CoreFloat]
+    ) {
+        self.weights = weights
+        self.pendingWeights = weights
+        self.sources = oscillators
     }
-        
-    func addSource(
-        _ source: CoreOscillator,
-        weight: CoreFloat = 1.0,
-        controller: MidiController? = nil
-    ) -> SourceIndex {
-        let sourceId = sources.count
-        weights.append(weight)
-        pendingWeights.append(weight)
-        sources.append(source)
-        return sourceId
-    }
-        
+                
     func setFrequency(_ frequency: CoreFloat) {
         sources.forEach {
             $0.setFrequency(frequency)

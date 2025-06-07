@@ -13,13 +13,9 @@ class DetunedOscillatorState: MidiControllableState<DetunedOscillatorState.State
     
     init(
         initial: State,
-        channel: MidiChannel,
-        controller: MidiController
+        controllerId: MidiControllerId
     ) {
-        self.controllerId = MidiControllerId(
-            channel: channel,
-            controller: controller
-        )
+        self.controllerId = controllerId
         super.init(initial: initial)
     }
     
