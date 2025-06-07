@@ -12,13 +12,15 @@ enum SwitcherContent {
     case image(String)
 }
 
+typealias SwitcherHandler = (Int) -> Void
+
 struct SwitcherView: View {
     @ObservedObject private var viewModel: SwitcherViewModel
     
     init(
         items: [SwitcherContent],
         selected: Int = 0,
-        handler: @escaping (Int) -> Void
+        handler: @escaping SwitcherHandler
     ) {
         viewModel = SwitcherViewModel(
             items: items,
@@ -76,7 +78,7 @@ struct SwitcherContentView: View {
 
 class SwitcherViewModel: ObservableObject {
     private(set) var items: [SwitcherContent]
-    private let handler: (Int) -> Void
+    private let handler: SwitcherHandler
     @Published private(set) var current: Int {
         didSet {
             handler(current)
@@ -86,7 +88,7 @@ class SwitcherViewModel: ObservableObject {
     init(
         items: [SwitcherContent],
         selected: Int,
-        handler: @escaping (Int) -> Void
+        handler: @escaping SwitcherHandler
     ) {
         assert(!items.isEmpty)
         self.items = items
