@@ -23,19 +23,16 @@ struct SynthesizerView: View {
                 DetuneControlGroupView(
                     states: context.midiStates.detunedOscillatorStates
                 )
-                .frame(height: 350)
                 .groupStyle(title: "Detune", height: controlHeight)
                 
                 MixerControlView(
                     state: context.midiStates.mixerOscillatorState
                 )
-                .frame(height: 350)
                 .groupStyle(title: "Mixing", height: controlHeight)
                 
                 EnvelopControlView(
                     state: context.midiStates.envelopeFilterState
                 )
-                .frame(height: 350)
                 .groupStyle(title: "Envelope", height: controlHeight)
             }
             
