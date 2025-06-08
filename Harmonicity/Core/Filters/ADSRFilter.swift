@@ -8,12 +8,7 @@
 import Atomics
 import Foundation
 
-final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
-    let id = UUID()
-    enum Parameter: Hashable {
-        case attack, decay, sustain, release
-    }
-    
+final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {    
     private enum State {
         case idle
         case attack

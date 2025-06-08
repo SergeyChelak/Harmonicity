@@ -16,9 +16,6 @@ struct DetuneControlGroupView: View {
     
     var body: some View {
         VStack {
-            Text("Detune")
-                .font(.title)
-                .padding(.bottom, 10)
             ForEach(states.indices, id: \.self) { index in
                 DetuneControlView(state: states[index])
                 if index < states.count - 1 {
@@ -26,8 +23,6 @@ struct DetuneControlGroupView: View {
                 }
             }
         }
-        .groupStyle()
-        
     }
 }
 

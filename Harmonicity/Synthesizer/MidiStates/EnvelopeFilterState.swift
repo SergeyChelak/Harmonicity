@@ -10,11 +10,11 @@ import Foundation
 class EnvelopeFilterState: MidiControllableState<EnvelopeFilterState.State, ADSRFilter> {
     typealias State = ADSRFilter.EnvelopeData
     
-    private let channel: MidiChannel
-    private let attackCtrl: MidiController
-    private let decayCtrl: MidiController
-    private let sustainCtrl: MidiController
-    private let releaseCtrl: MidiController
+    let channel: MidiChannel
+    let attackCtrl: MidiController
+    let decayCtrl: MidiController
+    let sustainCtrl: MidiController
+    let releaseCtrl: MidiController
     
     init(
         initial: State,
@@ -36,33 +36,28 @@ class EnvelopeFilterState: MidiControllableState<EnvelopeFilterState.State, ADSR
         guard self.channel == controllerId.channel else {
             return false
         }
-        return controllerId.channel == attackCtrl ||
-            controllerId.channel == decayCtrl ||
-            controllerId.channel == sustainCtrl ||
-            controllerId.channel == releaseCtrl
+        return controllerId.controller == attackCtrl ||
+        controllerId.controller == decayCtrl ||
+        controllerId.controller == sustainCtrl ||
+        controllerId.controller == releaseCtrl
     }
     
     override func map(_ controllerId: MidiControllerId, midiValue: MidiValue, stored: State) -> State? {
-        let ratio = CoreFloat(midiValue) / CoreFloat(maxMidiValue)
         var next = stored
-        if controllerId.channel == attackCtrl {
-            // 0 - 0.2
-            next.attackTime = 0.2 * ratio
+        if controllerId.controller == attackCtrl {
+            next.attackTime = convertFromMidi(midiValue, toValueFrom: attackTimeRange)
             return next
         }
-        if controllerId.channel == decayCtrl {
-            // 0 - 0.1
-            next.decayTime = 0.1 * ratio
+        if controllerId.controller == decayCtrl {
+            next.decayTime = convertFromMidi(midiValue, toValueFrom: decayTimeRange)
             return next
         }
-        if controllerId.channel == sustainCtrl {
-            // 0 - 1
-            next.sustainLevel = ratio
+        if controllerId.controller == sustainCtrl {
+            next.sustainLevel = convertFromMidi(midiValue, toValueFrom: sustainLevelRange)
             return next
         }
-        if controllerId.channel == releaseCtrl {
-            // 0 - 0.1
-            next.releaseTime = 0.1 * ratio
+        if controllerId.controller == releaseCtrl {
+            next.releaseTime = convertFromMidi(midiValue, toValueFrom: releaseTimeRange)
             return next
         }
         return nil
@@ -70,5 +65,21 @@ class EnvelopeFilterState: MidiControllableState<EnvelopeFilterState.State, ADSR
     
     override func update(_ obj: ADSRFilter, with value: State) {
         obj.setEnvelope(value)
+    }
+    
+    var attackTimeRange: Range<CoreFloat> {
+        0..<0.2
+    }
+    
+    var decayTimeRange: Range<CoreFloat> {
+        0..<0.2
+    }
+    
+    var sustainLevelRange: Range<CoreFloat> {
+        0..<1
+    }
+    
+    var releaseTimeRange: Range<CoreFloat> {
+        0..<0.2
     }
 }

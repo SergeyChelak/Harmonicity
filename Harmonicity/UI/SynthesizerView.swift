@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SynthesizerView: View {
+    private let controlHeight: CGFloat = 350
     let context: Context
     
     var body: some View {
@@ -17,12 +18,25 @@ struct SynthesizerView: View {
                 OscillatorSelectorGroupView(
                     states: context.midiStates.selectableOscillatorStates
                 )
+                .groupStyle(title: "Voice", height: controlHeight)
                 
                 DetuneControlGroupView(
                     states: context.midiStates.detunedOscillatorStates
                 )
+                .frame(height: 350)
+                .groupStyle(title: "Detune", height: controlHeight)
                 
-                MixerControlView(state: context.midiStates.mixerOscillatorState)
+                MixerControlView(
+                    state: context.midiStates.mixerOscillatorState
+                )
+                .frame(height: 350)
+                .groupStyle(title: "Mixing", height: controlHeight)
+                
+                EnvelopControlView(
+                    state: context.midiStates.envelopeFilterState
+                )
+                .frame(height: 350)
+                .groupStyle(title: "Envelope", height: controlHeight)
             }
             
             KeyboardView(

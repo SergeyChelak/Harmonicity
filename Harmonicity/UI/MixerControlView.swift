@@ -17,9 +17,6 @@ struct MixerControlView: View {
     
     var body: some View {
         VStack {
-            Text("Volume")
-                .font(.title)
-                .padding(.bottom, 10)
             ForEach(viewModel.levels.indices, id: \.self) { index in
                 HStack {
                     Button {
@@ -45,7 +42,6 @@ struct MixerControlView: View {
                 }
             }
         }
-        .groupStyle()
     }
 }
 
