@@ -32,6 +32,7 @@ class MixedOscillator: CoreOscillator {
     }
     
     func nextSample() -> CoreFloat {
+        applyUpdate()
         let (totalWeight, mixedSample) = zip(weights, sources)
             .reduce((0, 0)) { acc, val in
                 let (weight, source) = val

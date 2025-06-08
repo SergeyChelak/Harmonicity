@@ -9,8 +9,8 @@ import Foundation
 
 class MixerOscillatorState: MidiControllableState<MixerOscillatorState.State, MixedOscillator> {
     typealias State = [CoreFloat]
-    private let channel: MidiChannel
-    private let controllers: [MidiController]
+    let channel: MidiChannel
+    let controllers: [MidiController]
     
     init(
         initial: State,
@@ -40,11 +40,15 @@ class MixerOscillatorState: MidiControllableState<MixerOscillatorState.State, Mi
             return nil
         }
         var next = stored
-        next[index] = CoreFloat(midiValue)
+        next[index] = convertFromMidi(midiValue, toValueFrom: volumeRange)
         return next
     }
     
     override func update(_ obj: MixedOscillator, with value: State) {
         obj.setWeights(value)
+    }
+    
+    var volumeRange: Range<CoreFloat> {
+        0..<1
     }
 }

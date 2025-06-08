@@ -21,6 +21,8 @@ struct SynthesizerView: View {
                 DetuneControlGroupView(
                     states: context.midiStates.detunedOscillatorStates
                 )
+                
+                MixerControlView(state: context.midiStates.mixerOscillatorState)
             }
             
             KeyboardView(
