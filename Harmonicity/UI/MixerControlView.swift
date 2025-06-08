@@ -45,7 +45,6 @@ struct MixerControlView: View {
                 }
             }
         }
-        .frame(width: 250)
         .groupStyle()
     }
 }

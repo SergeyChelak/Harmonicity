@@ -29,7 +29,6 @@ struct OscillatorSelectorGroupView: View {
             }
         }
         .groupStyle()
-        .frame(width: 250)
     }
 }
 

@@ -5,6 +5,7 @@
 //  Created by Sergey on 07.06.2025.
 //
 
+import Combine
 import SwiftUI
 
 struct DetuneControlView: View {
@@ -29,19 +30,20 @@ struct DetuneControlView: View {
 }
 
 final class DetuneControlViewModel: ObservableObject {
+    private var cancellable: AnyCancellable?
     private let state: DetunedOscillatorState
-    @Published private(set) var midiFloatValue: CoreFloat
+    @Published private(set) var midiFloatValue: CoreFloat = 0
     
     init(state: DetunedOscillatorState) {
         self.state = state
-        self.midiFloatValue = CoreFloat(convertToMidi(
-            state.storedValue,
-            from: state.detuneRange
-        ))
+        self.cancellable = state.publisher
+            .sink { [weak self] in
+                let midi = convertToMidi($0, from: state.detuneRange)
+                self?.midiFloatValue = CoreFloat(midi)
+            }
     }
     
     func valueChanged(_ value: MidiValue) {
-        midiFloatValue = CoreFloat(value)
         state.controlChanged(state.controllerId, value: value)
     }
     

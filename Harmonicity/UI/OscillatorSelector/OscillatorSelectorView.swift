@@ -32,14 +32,12 @@ struct OscillatorSelectorView: View {
 class OscillatorSelectorViewModel: ObservableObject {
     private var cancellable: AnyCancellable?
     private let state: SelectableOscillatorState
-    
-    @Published private(set) var selected: Int
+    @Published private(set) var selected: Int = 0
     
     init(
         state: SelectableOscillatorState
     ) {
         self.state = state
-        self.selected = state.storedValue
         self.cancellable = state.publisher.sink { [weak self] in
             self?.selected = $0
         }
