@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SynthesizerView: View {
     private let voiceControlHeight: CGFloat = 350
-    private let postProcessControlHeight: CGFloat = 100
+    private let postProcessControlHeight: CGFloat = 150
     let context: Context
     
     var body: some View {
@@ -38,8 +38,10 @@ struct SynthesizerView: View {
             }
             
             HStack(spacing: 16) {
-                DelayControlView()
-                    .groupStyle(title: "Delay", height: postProcessControlHeight)
+                DelayControlView(
+                    state: context.midiStates.delayControlState
+                )
+                .groupStyle(title: "Delay", height: postProcessControlHeight)
                 
                 ReverbControlView(
                     state: context.midiStates.reverbControlState
