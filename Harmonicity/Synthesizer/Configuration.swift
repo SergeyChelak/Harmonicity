@@ -6,13 +6,15 @@
 //
 
 import Foundation
+import AVFAudio
 
 final class Configuration {
-    enum ControlOffset: MidiChannel {
+    private enum ControlOffset: MidiChannel {
         case selectable = 1
         case detune = 10
         case mixer = 20
         case envelope = 30
+        case reverb = 40
     }
     
     private let channel: MidiChannel
@@ -69,6 +71,34 @@ final class Configuration {
     
     var voices: Int {
         8
+    }
+    
+    var reverbControls: MixerControllerIds {
+        return MixerControllerIds(
+            channel: channel,
+            controllers: [
+                ControlOffset.reverb.rawValue,
+                ControlOffset.reverb.rawValue + 1,
+            ]
+        )
+    }
+    
+    var reverbPresets: [AVAudioUnitReverbPreset] {
+        [
+            .smallRoom,
+            .mediumRoom,
+            .largeRoom,
+            .mediumHall,
+            .largeHall,
+            .plate,
+            .mediumChamber,
+            .largeChamber,
+            .cathedral,
+            .largeRoom2,
+            .mediumHall2,
+            .mediumHall3,
+            .largeHall2
+        ]
     }
     
     struct MixerControllerIds {

@@ -12,6 +12,7 @@ final class MidiControllerStates {
     let detunedOscillatorStates: [DetunedOscillatorState]
     let mixerOscillatorState: MixerOscillatorState
     let envelopeFilterState: EnvelopeFilterState
+    let reverbControlState: ReverbControlState
     
     init(config: Configuration) {
         // ----
@@ -50,6 +51,17 @@ final class MidiControllerStates {
             decayCtrl: envelopeFilterControls.controllers[1],
             sustainCtrl: envelopeFilterControls.controllers[2],
             releaseCtrl: envelopeFilterControls.controllers[3]
+        )
+        
+        // ---
+        let reverbState = ReverbControlState.State(preset: 0, wetDryMix: 15)
+        let reverbConfig = config.reverbControls
+        reverbControlState = ReverbControlState(
+            initial: reverbState,
+            presets: config.reverbPresets,
+            channel: reverbConfig.channel,
+            presetCtrl: reverbConfig.controllers[0],
+            dryWetMixCtrl: reverbConfig.controllers[1]
         )
     }
 }

@@ -50,7 +50,7 @@ func composeContext() throws -> Context {
     let synthesizer = Synthesizer(
         voice: composer.voice(),
         engine: engine,
-        controlHandler: midiStates,
+        states: midiStates,
         commandPublisher: commandCenter.publisher
     )
     try synthesizer.start()
