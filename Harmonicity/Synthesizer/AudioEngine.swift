@@ -33,21 +33,12 @@ final class AudioEngine {
     }
     
     func setup(_ source: CoreSampleSource) throws {
-        let format = audioEngine.outputNode.inputFormat(forBus: 0)
-        guard let inputFormat = AVAudioFormat(
-            commonFormat: format.commonFormat,
-            sampleRate: format.sampleRate,
-            channels: 1,
-            interleaved: format.isInterleaved
-        ) else {
-            throw AudioEngineError.formatInitializationFailed
-        }
         // ---
         audioEngine.attachAndConnect(reverbNode, to: audioEngine.outputNode, format: nil)
         
         // --
         let sourceNode: AVAudioSourceNode = .withSource(source)
-        audioEngine.attachAndConnect(sourceNode, to: reverbNode, format: inputFormat)
+        audioEngine.attachAndConnect(sourceNode, to: reverbNode, format: nil)
     }
     
     func start() throws {
