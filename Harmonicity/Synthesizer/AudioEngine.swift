@@ -15,7 +15,14 @@ enum AudioEngineError: Error {
 
 final class AudioEngine {
     private let audioEngine = AVAudioEngine()
-    var sampleSource: CoreSampleSource?
+    
+    private let reverbNode: AVAudioUnitReverb = {
+        let node = AVAudioUnitReverb()
+        // Configure reverb
+        node.loadFactoryPreset(.mediumHall)
+        node.wetDryMix = 20.0 
+        return node
+    }()
         
     deinit {
         stop()
@@ -25,26 +32,7 @@ final class AudioEngine {
         audioEngine.outputNode.inputFormat(forBus: 0).sampleRate
     }
     
-    func setup() throws {
-        let sourceNode = AVAudioSourceNode { [weak self] (isSilence, _, frameCount, audioBufferList) -> OSStatus in
-            guard let voice = self?.sampleSource else {
-                isSilence.pointee = true
-                return noErr
-            }
-            let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
-            for frame in 0..<Int(frameCount) {
-                let sample = voice.nextSample()
-                for buffer in ablPointer {
-                    guard let pointer = buffer.mData?.assumingMemoryBound(to: Float.self) else {
-                        continue
-                    }
-                    pointer[frame] = Float(sample)
-                }
-            }
-            
-            isSilence.pointee = false
-            return noErr
-        }
+    func setup(_ source: CoreSampleSource) throws {
         let format = audioEngine.outputNode.inputFormat(forBus: 0)
         guard let inputFormat = AVAudioFormat(
             commonFormat: format.commonFormat,
@@ -54,11 +42,12 @@ final class AudioEngine {
         ) else {
             throw AudioEngineError.formatInitializationFailed
         }
-        audioEngine.attachAndConnect(
-            sourceNode,
-            to: audioEngine.outputNode,
-            format: inputFormat
-        )
+        // ---
+        audioEngine.attachAndConnect(reverbNode, to: audioEngine.outputNode, format: nil)
+        
+        // --
+        let sourceNode: AVAudioSourceNode = .withSource(source)
+        audioEngine.attachAndConnect(sourceNode, to: reverbNode, format: inputFormat)
     }
     
     func start() throws {
@@ -83,5 +72,25 @@ fileprivate extension AVAudioEngine {
     ) {
         attach(node)
         connect(node, to: node2, format: format)
+    }
+}
+
+extension AVAudioSourceNode {
+    static func withSource(_ source: CoreSampleSource) -> AVAudioSourceNode {
+        AVAudioSourceNode { (isSilence, _, frameCount, audioBufferList) -> OSStatus in
+            let ablPointer = UnsafeMutableAudioBufferListPointer(audioBufferList)
+            for frame in 0..<Int(frameCount) {
+                let sample = source.nextSample()
+                for buffer in ablPointer {
+                    guard let pointer = buffer.mData?.assumingMemoryBound(to: Float.self) else {
+                        continue
+                    }
+                    pointer[frame] = Float(sample)
+                }
+            }
+            
+            isSilence.pointee = false
+            return noErr
+        }
     }
 }

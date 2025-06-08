@@ -29,8 +29,7 @@ final class Synthesizer {
         
     func start() throws {
         engine.stop()
-        engine.sampleSource = voice
-        try engine.setup()
+        try engine.setup(voice)
         try engine.start()
     }
             
