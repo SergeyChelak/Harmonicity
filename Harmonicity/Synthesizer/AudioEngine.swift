@@ -33,8 +33,12 @@ final class AudioEngine {
         audioEngine.attachAndConnect(reverbNode, to: audioEngine.outputNode, format: nil)
         
         // --
+        let delayNode: AVAudioUnitDelay = .withState(states.delayControlState)
+        audioEngine.attachAndConnect(delayNode, to: reverbNode, format: nil)
+        
+        // --
         let sourceNode: AVAudioSourceNode = .withSource(source)
-        audioEngine.attachAndConnect(sourceNode, to: reverbNode, format: nil)
+        audioEngine.attachAndConnect(sourceNode, to: delayNode, format: nil)
     }
     
     func start() throws {
@@ -85,6 +89,15 @@ extension AVAudioSourceNode {
 extension AVAudioUnitReverb {
     static func withState(_ state: ReverbControlState) -> AVAudioUnitReverb {
         let node = AVAudioUnitReverb()
+        state.addSubscriber(node)
+        state.update(node, with: state.storedValue)
+        return node
+    }
+}
+
+extension AVAudioUnitDelay {
+    static func withState(_ state: DelayControlState) -> AVAudioUnitDelay {
+        let node = AVAudioUnitDelay()
         state.addSubscriber(node)
         state.update(node, with: state.storedValue)
         return node

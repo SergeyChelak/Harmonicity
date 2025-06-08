@@ -15,6 +15,7 @@ final class Configuration {
         case mixer = 20
         case envelope = 30
         case reverb = 40
+        case delay = 50
     }
     
     private let channel: MidiChannel
@@ -99,6 +100,18 @@ final class Configuration {
             .mediumHall3,
             .largeHall2
         ]
+    }
+    
+    var delayControls: MixerControllerIds {
+        return MixerControllerIds(
+            channel: channel,
+            controllers: [
+                ControlOffset.delay.rawValue,
+                ControlOffset.delay.rawValue + 1,
+                ControlOffset.delay.rawValue + 2,
+                ControlOffset.delay.rawValue + 3,
+            ]
+        )
     }
     
     struct MixerControllerIds {

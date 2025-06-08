@@ -9,6 +9,7 @@ import Foundation
 
 protocol MidiPostProcessControlStates {
     var reverbControlState: ReverbControlState { get }
+    var delayControlState: DelayControlState { get }
 }
 
 final class MidiControllerStates: MidiPostProcessControlStates {
@@ -17,6 +18,7 @@ final class MidiControllerStates: MidiPostProcessControlStates {
     let mixerOscillatorState: MixerOscillatorState
     let envelopeFilterState: EnvelopeFilterState
     let reverbControlState: ReverbControlState
+    let delayControlState: DelayControlState
     
     init(config: Configuration) {
         // ----
@@ -66,6 +68,17 @@ final class MidiControllerStates: MidiPostProcessControlStates {
             channel: reverbConfig.channel,
             presetCtrl: reverbConfig.controllers[0],
             dryWetMixCtrl: reverbConfig.controllers[1]
+        )
+        
+        // ---
+        let delayCtrls = config.delayControls
+        delayControlState = DelayControlState(
+            initial: DelayControlState.State(),
+            channel: delayCtrls.channel,
+            delayCtrl: delayCtrls.controllers[0],
+            feedbackCtrl: delayCtrls.controllers[1],
+            lowPassCutoffCtrl: delayCtrls.controllers[2],
+            dryWetMixCtrl: delayCtrls.controllers[3]
         )
     }
 }
