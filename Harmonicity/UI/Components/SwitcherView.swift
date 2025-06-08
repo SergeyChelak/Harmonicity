@@ -39,7 +39,6 @@ struct SwitcherView: View {
             SwitcherContentView(
                 item: viewModel.selectedItem
             )
-            .frame(width: 120)
             
             button(
                 imageName: "right-arrow",

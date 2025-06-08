@@ -16,7 +16,7 @@ struct ReverbControlView: View {
     }
     
     var body: some View {
-        HStack {
+        VStack {
             VStack {
                 Text("Preset")
                 SwitcherView(
@@ -25,7 +25,7 @@ struct ReverbControlView: View {
                     handler: viewModel.presetChanged
                 )
             }
-            
+            Divider()
             VStack {
                 Text("Dry/Wet Mix")
                 SliderView(
