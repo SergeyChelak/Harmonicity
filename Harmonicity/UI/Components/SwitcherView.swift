@@ -69,7 +69,8 @@ struct SwitcherContentView: View {
         case .text(let string):
             Text(string)
                 .font(.title)
-                .foregroundStyle(.red)
+                .foregroundStyle(.white)
+                .multilineTextAlignment(.center)
         case .image(let string):
             Image(string)
         }

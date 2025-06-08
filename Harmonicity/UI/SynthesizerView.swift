@@ -41,8 +41,10 @@ struct SynthesizerView: View {
                 DelayControlView()
                     .groupStyle(title: "Delay", height: postProcessControlHeight)
                 
-                ReverbControlView()
-                    .groupStyle(title: "Reverb", height: postProcessControlHeight)
+                ReverbControlView(
+                    state: context.midiStates.reverbControlState
+                )
+                .groupStyle(title: "Reverb", height: postProcessControlHeight)
             }
             
             KeyboardView(

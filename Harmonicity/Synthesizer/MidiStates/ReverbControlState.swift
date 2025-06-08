@@ -48,18 +48,19 @@ final class ReverbControlState: MidiControllableState<ReverbControlState.State, 
         var next = stored
         if controllerId.controller == presetCtrl {
             next.preset = Int(midiValue) % presets.count
-            return stored
+            return next
         }
         
         if controllerId.controller == dryWetMixCtrl {
             next.wetDryMix = convertFromMidi(midiValue, toValueFrom: dryWetRange)
-            return stored
+            return next
         }
         
         return nil
     }
     
     override func update(_ obj: AVAudioUnitReverb, with value: State) {
+        print(value)
         obj.wetDryMix = Float(value.wetDryMix)
         obj.loadFactoryPreset(presets[value.preset])
     }
