@@ -43,7 +43,7 @@ struct HarmonicityApp: App {
                 }
 #if os(OSX)
                 .onDisappear {
-                    NSApplication.shared.terminate(nil)
+                    Darwin.exit(0)
                 }
 #endif
         }
