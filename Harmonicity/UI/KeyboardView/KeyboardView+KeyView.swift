@@ -46,7 +46,6 @@ extension KeyboardView {
         }
         
         private func onPress(_ isPressed: Bool) {
-            print("Virtual keyboard: \(note)\(octave) is pressed \(isPressed)")
             let note = MidiNote(
                 note: MidiNoteNumber(note.rawValue + 12 * (1 + octave)),
                 velocity: isPressed ? 62 : 0
