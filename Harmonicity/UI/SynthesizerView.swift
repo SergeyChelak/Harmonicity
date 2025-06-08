@@ -8,32 +8,41 @@
 import SwiftUI
 
 struct SynthesizerView: View {
-    private let controlHeight: CGFloat = 350
+    private let voiceControlHeight: CGFloat = 350
+    private let postProcessControlHeight: CGFloat = 100
     let context: Context
     
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 16) {
             
             HStack(spacing: 16) {
                 OscillatorSelectorGroupView(
                     states: context.midiStates.selectableOscillatorStates
                 )
-                .groupStyle(title: "Voice", height: controlHeight)
+                .groupStyle(title: "Voice", height: voiceControlHeight)
                 
                 DetuneControlGroupView(
                     states: context.midiStates.detunedOscillatorStates
                 )
-                .groupStyle(title: "Detune", height: controlHeight)
+                .groupStyle(title: "Detune", height: voiceControlHeight)
                 
                 MixerControlView(
                     state: context.midiStates.mixerOscillatorState
                 )
-                .groupStyle(title: "Mixing", height: controlHeight)
+                .groupStyle(title: "Mixing", height: voiceControlHeight)
                 
                 EnvelopControlView(
                     state: context.midiStates.envelopeFilterState
                 )
-                .groupStyle(title: "Envelope", height: controlHeight)
+                .groupStyle(title: "Envelope", height: voiceControlHeight)
+            }
+            
+            HStack(spacing: 16) {
+                DelayControlView()
+                    .groupStyle(title: "Delay", height: postProcessControlHeight)
+                
+                ReverbControlView()
+                    .groupStyle(title: "Reverb", height: postProcessControlHeight)
             }
             
             KeyboardView(
@@ -41,6 +50,7 @@ struct SynthesizerView: View {
                 midiChannel: virtualMidiChannel,
                 commandCenter: context.commandCenter
             )
+//            .groupStyle(title: "", height: 150)
         }
         .padding()        
     }
