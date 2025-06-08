@@ -60,7 +60,6 @@ final class ReverbControlState: MidiControllableState<ReverbControlState.State, 
     }
     
     override func update(_ obj: AVAudioUnitReverb, with value: State) {
-        print(value)
         obj.wetDryMix = Float(value.wetDryMix)
         obj.loadFactoryPreset(presets[value.preset])
     }

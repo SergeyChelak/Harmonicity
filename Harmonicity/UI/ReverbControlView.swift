@@ -17,12 +17,23 @@ struct ReverbControlView: View {
     
     var body: some View {
         HStack {
-            SwitcherView(
-                items: viewModel.presets,
-                selected: viewModel.presetNumber,
-                handler: viewModel.presetChanged
-            )
+            VStack {
+                Text("Preset")
+                SwitcherView(
+                    items: viewModel.presets,
+                    selected: viewModel.presetNumber,
+                    handler: viewModel.presetChanged
+                )
+            }
             
+            VStack {
+                Text("Dry/Wet Mix")
+                SliderView(
+                    viewModel.dryWetMix,
+                    formatter: viewModel.dryWetFormat(_:),
+                    handler: viewModel.dryWetChanged(_:)
+                )
+            }
         }
     }
 }
@@ -31,11 +42,13 @@ final class ReverbControlViewModel: ObservableObject {
     private var cancellable: AnyCancellable?
     private let state: ReverbControlState
     @Published var presetNumber: Int = 0
+    @Published var dryWetMix: CoreFloat = 0
     
     init(state: ReverbControlState) {
         self.state = state
         self.cancellable = state.publisher.sink { [weak self] in
             self?.presetNumber = $0.preset
+            self?.dryWetMix = CoreFloat(convertToMidi($0.wetDryMix, from: state.dryWetRange))
         }
     }
     
@@ -68,6 +81,19 @@ final class ReverbControlViewModel: ObservableObject {
             controller: state.presetCtrl
         )
         state.controlChanged(controlId, value: MidiValue(index))
+    }
+    
+    func dryWetChanged(_ value: MidiValue) {
+        let controlId = MidiControllerId(
+            channel: state.channel,
+            controller: state.dryWetMixCtrl
+        )
+        state.controlChanged(controlId, value: value)
+    }
+    
+    func dryWetFormat(_ value: MidiValue) -> String {
+        let value = convertFromMidi(value, toValueFrom: state.dryWetRange)
+        return "\(Int(value)) %"
     }
 }
 
