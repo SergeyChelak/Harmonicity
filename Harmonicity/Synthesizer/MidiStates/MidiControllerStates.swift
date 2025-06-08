@@ -7,7 +7,11 @@
 
 import Foundation
 
-final class MidiControllerStates {
+protocol MidiPostProcessControlStates {
+    var reverbControlState: ReverbControlState { get }
+}
+
+final class MidiControllerStates: MidiPostProcessControlStates {
     let selectableOscillatorStates: [SelectableOscillatorState]
     let detunedOscillatorStates: [DetunedOscillatorState]
     let mixerOscillatorState: MixerOscillatorState

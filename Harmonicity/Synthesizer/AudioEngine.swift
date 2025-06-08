@@ -15,15 +15,7 @@ enum AudioEngineError: Error {
 
 final class AudioEngine {
     private let audioEngine = AVAudioEngine()
-    
-    private let reverbNode: AVAudioUnitReverb = {
-        let node = AVAudioUnitReverb()
-        // Configure reverb
-        node.loadFactoryPreset(.mediumHall)
-        node.wetDryMix = 20.0 
-        return node
-    }()
-        
+            
     deinit {
         stop()
     }
@@ -32,8 +24,12 @@ final class AudioEngine {
         audioEngine.outputNode.inputFormat(forBus: 0).sampleRate
     }
     
-    func setup(_ source: CoreSampleSource) throws {
+    func setup(
+        _ source: CoreSampleSource,
+        _ states: MidiPostProcessControlStates
+    ) throws {
         // ---
+        let reverbNode: AVAudioUnitReverb = .withState(states.reverbControlState)
         audioEngine.attachAndConnect(reverbNode, to: audioEngine.outputNode, format: nil)
         
         // --
@@ -83,5 +79,14 @@ extension AVAudioSourceNode {
             isSilence.pointee = false
             return noErr
         }
+    }
+}
+
+extension AVAudioUnitReverb {
+    static func withState(_ state: ReverbControlState) -> AVAudioUnitReverb {
+        let node = AVAudioUnitReverb()
+        state.addSubscriber(node)
+        state.update(node, with: state.storedValue)
+        return node
     }
 }
