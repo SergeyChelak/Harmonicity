@@ -2,6 +2,8 @@
 
 Harmonicity is a polyphonic synthesizer for macOS, crafted with SwiftUI and powered by AVAudioEngine. It offers a customizable sound experience with MIDI input handling and a suite of post-processing effects.
 
+![Screenshot](doc/Screenshot.png)
+
 # Features
 
 - Polyphonic: Play multiple notes simultaneously for complex harmonies.
