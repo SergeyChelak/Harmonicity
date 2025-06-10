@@ -70,13 +70,19 @@ class MonoVoice: CoreMonoVoice {
     }
     
     func nextSample() -> CoreFloat {
+        tryUpdateStateWithDriver()
         if state.isIdle {
             return 0.0
         }
-        if case(.driver(let driver)) = resetBy {
-            state = driver.noteState()
-        }
-        
         return amplitude * oscillator.nextSample()
+    }
+    
+    private func tryUpdateStateWithDriver() {
+        guard case(.driver(let driver)) = resetBy else {
+            return
+        }
+        if driver.noteState().isIdle && state.isReleasing {
+            reset()
+        }
     }
 }
