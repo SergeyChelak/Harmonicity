@@ -31,7 +31,7 @@ protocol CoreOscillator: CoreSampleSource {
 
 protocol CoreWaveForm {
     func value(_ x: CoreFloat) -> CoreFloat
-    func phaseRange() -> Range<CoreFloat>
+    func phaseRange() -> CoreRange
 }
 
 extension CoreWaveForm {

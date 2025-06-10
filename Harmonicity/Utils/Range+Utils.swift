@@ -7,7 +7,9 @@
 
 import Foundation
 
-extension Range<CoreFloat> {
+typealias CoreRange = Range<CoreFloat>
+
+extension CoreRange {
     var length: CoreFloat {
         upperBound - lowerBound
     }

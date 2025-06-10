@@ -67,19 +67,19 @@ class EnvelopeFilterState: MidiControllableState<EnvelopeFilterState.State, ADSR
         obj.setEnvelope(value)
     }
     
-    var attackTimeRange: Range<CoreFloat> {
+    var attackTimeRange: CoreRange {
         0..<0.2
     }
     
-    var decayTimeRange: Range<CoreFloat> {
+    var decayTimeRange: CoreRange {
         0..<0.2
     }
     
-    var sustainLevelRange: Range<CoreFloat> {
+    var sustainLevelRange: CoreRange {
         0..<1
     }
     
-    var releaseTimeRange: Range<CoreFloat> {
+    var releaseTimeRange: CoreRange {
         0..<0.2
     }
 }

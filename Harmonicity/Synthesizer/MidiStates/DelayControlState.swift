@@ -70,20 +70,20 @@ final class DelayControlState: MidiControllableState<DelayControlState.State, AV
         obj.wetDryMix = Float(value.dryWetMix)
     }
     
-    var delayRange: Range<CoreFloat> {
+    var delayRange: CoreRange {
         0..<2
     }
     
-    var feedbackRange: Range<CoreFloat> {
+    var feedbackRange: CoreRange {
         -100..<100
     }
     
-    var lowPassCutoffRange: Range<CoreFloat> {
+    var lowPassCutoffRange: CoreRange {
         // 10 -> (samplerate/2)
         20..<20_000
     }
     
-    var dryWetRange: Range<CoreFloat> {
+    var dryWetRange: CoreRange {
         0..<100
     }
     

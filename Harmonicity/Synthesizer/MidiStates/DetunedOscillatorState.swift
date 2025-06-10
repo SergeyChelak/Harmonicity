@@ -31,7 +31,7 @@ class DetunedOscillatorState: MidiControllableState<DetunedOscillatorState.State
         obj.setDetune(value)
     }
     
-    var detuneRange: Range<CoreFloat> {
+    var detuneRange: CoreRange {
         -24.0..<24.0
     }
 }

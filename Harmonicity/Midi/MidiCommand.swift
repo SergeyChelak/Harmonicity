@@ -32,11 +32,11 @@ struct MidiNote {
 let virtualMidiChannel: MidiChannel = MidiChannel.max
 let maxMidiValue: MidiValue = 127
 
-func convertFromMidi(_ midiValue: MidiValue, toValueFrom range: Range<CoreFloat>) -> CoreFloat {
+func convertFromMidi(_ midiValue: MidiValue, toValueFrom range: CoreRange) -> CoreFloat {
     CoreFloat(midiValue) * range.length / CoreFloat(maxMidiValue) + range.lowerBound
 }
 
-func convertToMidi(_ value: CoreFloat, from range: Range<CoreFloat>) -> MidiValue {
+func convertToMidi(_ value: CoreFloat, from range: CoreRange) -> MidiValue {
     let floatMidi = CoreFloat(maxMidiValue) * (value - range.lowerBound) / range.length
     return MidiValue(floatMidi)
 }

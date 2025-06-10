@@ -33,7 +33,7 @@ final class ReverbControlState: MidiControllableState<ReverbControlState.State, 
         super.init(initial: initial)
     }
     
-    var dryWetRange: Range<CoreFloat> {
+    var dryWetRange: CoreRange {
         0..<100
     }
     

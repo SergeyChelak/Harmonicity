@@ -48,7 +48,7 @@ class MixerOscillatorState: MidiControllableState<MixerOscillatorState.State, Mi
         obj.setWeights(value)
     }
     
-    var volumeRange: Range<CoreFloat> {
+    var volumeRange: CoreRange {
         0..<1
     }
 }

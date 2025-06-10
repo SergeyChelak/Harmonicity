@@ -18,7 +18,7 @@ class WaveOscillator: Oscillator<WaveOscillator.Data> {
     private let waveForm: CoreWaveForm
     
     // cache
-    private let range: Range<CoreFloat>
+    private let range: CoreRange
         
     init(sampleRate: CoreFloat, waveForm: CoreWaveForm) {
         self.sampleRate = sampleRate
