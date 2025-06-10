@@ -13,6 +13,14 @@ protocol CoreProcessor {
     func process(_ sample: CoreFloat) -> CoreFloat
 }
 
+protocol CoreNoteStateDriver {
+    func noteState() -> NoteState
+}
+
+protocol CoreEnvelopeFilter: CoreProcessor, CoreNoteStateDriver {
+    //
+}
+
 protocol CoreSampleSource {
     func nextSample() -> CoreFloat
 }
@@ -38,7 +46,7 @@ protocol CoreOscillatorFactory {
 }
 
 protocol CoreVoice: CoreSampleSource, CoreMidiNoteHandler {
-    var state: VoiceState { get }
+    var state: NoteState { get }
     func canPlay(_ note: MidiNote) -> Bool
 }
 
@@ -55,7 +63,7 @@ protocol CoreMidiControlChangeHandler {
     func controlChanged(_ controllerId: MidiControllerId, value: MidiValue)
 }
 
-enum VoiceState {
+enum NoteState {
     case idle
     case play
     case release

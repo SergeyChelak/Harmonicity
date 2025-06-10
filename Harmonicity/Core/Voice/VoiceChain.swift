@@ -20,7 +20,7 @@ final class VoiceChain<T: CoreVoice>: CoreVoice {
         processChain.append(processor)
     }
     
-    var state: VoiceState {
+    var state: NoteState {
         voice.state
     }
     

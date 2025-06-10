@@ -14,7 +14,7 @@ final class PolyphonicVoice : CoreVoice {
         self.voices = voices
     }
     
-    var state: VoiceState {
+    var state: NoteState {
         fatalError()
     }
     

@@ -8,18 +8,23 @@
 import Foundation
 
 class MonoVoice: CoreMonoVoice {
+    enum ResetBy {
+        case time(CoreFloat)
+        case driver(CoreNoteStateDriver)
+    }
+    
     private let oscillator: CoreOscillator
     private var amplitude: CoreFloat = 0.0
-    private(set) var state: VoiceState = .idle
+    private(set) var state: NoteState = .idle
     private(set) var noteNumber: MidiNoteNumber = .max
-    private var releaseTime: CoreFloat
+    private let resetBy: ResetBy
     
     init(
         oscillator: CoreOscillator,
-        releaseTime: CoreFloat = 0.0
+        resetBy: ResetBy
     ) {
         self.oscillator = oscillator
-        self.releaseTime = releaseTime
+        self.resetBy = resetBy
     }
     
     func canPlay(_ note: MidiNote) -> Bool {
@@ -41,10 +46,13 @@ class MonoVoice: CoreMonoVoice {
             return
         }
         state = .release
-        if releaseTime < 0.0 {
-            // sound forever
-            return
+        
+        if case(.time(let releaseTime)) = resetBy {
+            startResetCountDown(releaseTime)
         }
+    }
+                
+    private func startResetCountDown(_ releaseTime: CoreFloat) {
         let durationMs = Int(releaseTime * 1000)
         DispatchQueue
             .global(qos: .background)
@@ -65,6 +73,10 @@ class MonoVoice: CoreMonoVoice {
         if state.isIdle {
             return 0.0
         }
+        if case(.driver(let driver)) = resetBy {
+            state = driver.noteState()
+        }
+        
         return amplitude * oscillator.nextSample()
     }
 }

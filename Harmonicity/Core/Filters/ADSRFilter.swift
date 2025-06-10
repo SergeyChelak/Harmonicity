@@ -8,7 +8,7 @@
 import Atomics
 import Foundation
 
-final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {    
+final class ADSRFilter: CoreEnvelopeFilter, CoreMidiNoteHandler {
     private enum State {
         case idle
         case attack
@@ -72,6 +72,21 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
         startLevel = 0.0
     }
     
+    func noteState() -> NoteState {
+        switch currentState {
+        case .idle:
+                .idle
+        case .attack:
+                .play
+        case .decay:
+                .play
+        case .sustain:
+                .play
+        case .release:
+                .release
+        }
+    }
+    
     private func applyUpdate() {
         if needsUpdate.compareExchange(
             expected: true,
@@ -83,7 +98,8 @@ final class ADSRFilter: CoreProcessor, CoreMidiNoteHandler {
     }
     
     func process(_ sample: CoreFloat) -> CoreFloat {
-        level() * sample
+        guard currentState != .idle else { return 0.0 }
+        return level() * sample
     }
 
     private func level() -> CoreFloat {

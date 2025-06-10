@@ -23,21 +23,21 @@ struct VoiceComposer {
     
     private func composeMonoVoice() -> CoreMonoVoice {
         let mixedOscillator = composeMixedOscillator()
+        let envelopeFilter = composeEnvelopeFilter()
         
         let monoVoice = MonoVoice(
             oscillator: mixedOscillator,
-            releaseTime: -0.1
+            resetBy: .driver(envelopeFilter)
         )
         
         let voiceChain = VoiceChain(voice: monoVoice)
 
-        let lowPassFilter = LowPassFilter(
-            sampleRate: sampleRate,
-            cutoffFrequency: 10_000
-        )
-        voiceChain.chain(lowPassFilter)
-
-        let envelopeFilter = composeEnvelopeFilter()
+//        let lowPassFilter = LowPassFilter(
+//            sampleRate: sampleRate,
+//            cutoffFrequency: 10_000
+//        )
+//        voiceChain.chain(lowPassFilter)
+        
         voiceChain.chain(envelopeFilter)
         
         return voiceChain
@@ -80,7 +80,7 @@ struct VoiceComposer {
         return oscillator
     }
     
-    private func composeEnvelopeFilter() -> CoreProcessor {
+    private func composeEnvelopeFilter() -> CoreEnvelopeFilter {
         let envelopeFilter = ADSRFilter(
             sampleRate: sampleRate,
             envelope: midiStates.envelopeFilterState.storedValue
