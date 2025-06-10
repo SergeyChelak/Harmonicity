@@ -40,3 +40,8 @@ func convertToMidi(_ value: CoreFloat, from range: CoreRange) -> MidiValue {
     let floatMidi = CoreFloat(maxMidiValue) * (value - range.lowerBound) / range.length
     return MidiValue(floatMidi)
 }
+
+func convertToCfMidi(_ value: CoreFloat, from range: CoreRange) -> CoreFloat {
+    let midi = convertToMidi(value, from: range)
+    return CoreFloat(midi)
+}

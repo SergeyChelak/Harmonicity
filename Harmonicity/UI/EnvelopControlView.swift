@@ -63,10 +63,10 @@ final class EnvelopControlViewModel: ObservableObject {
     init(state: EnvelopeFilterState) {
         self.state = state
         self.cancellable = state.publisher.sink { [weak self] in
-            self?.attack = CoreFloat(convertToMidi($0.attackTime, from: state.attackTimeRange))
-            self?.decay = CoreFloat(convertToMidi($0.decayTime, from: state.decayTimeRange))
-            self?.sustain = CoreFloat(convertToMidi($0.sustainLevel, from: state.sustainLevelRange))
-            self?.release = CoreFloat(convertToMidi($0.releaseTime, from: state.releaseTimeRange))
+            self?.attack = convertToCfMidi($0.attackTime, from: state.attackTimeRange)
+            self?.decay = convertToCfMidi($0.decayTime, from: state.decayTimeRange)
+            self?.sustain = convertToCfMidi($0.sustainLevel, from: state.sustainLevelRange)
+            self?.release = convertToCfMidi($0.releaseTime, from: state.releaseTimeRange)
         }
     }
     

@@ -48,7 +48,7 @@ final class ReverbControlViewModel: ObservableObject {
         self.state = state
         self.cancellable = state.publisher.sink { [weak self] in
             self?.presetNumber = $0.preset
-            self?.dryWetMix = CoreFloat(convertToMidi($0.wetDryMix, from: state.dryWetRange))
+            self?.dryWetMix = convertToCfMidi($0.wetDryMix, from: state.dryWetRange)
         }
     }
     

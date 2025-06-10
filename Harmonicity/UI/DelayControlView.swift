@@ -63,10 +63,10 @@ final class DelayControlViewModel: ObservableObject {
     init(state: DelayControlState) {
         self.state = state
         self.cancellable = state.publisher.sink { [weak self] in
-            self?.delayTime = CoreFloat(convertToMidi($0.delayTime, from: state.delayRange))
-            self?.feedback = CoreFloat(convertToMidi($0.feedback, from: state.feedbackRange))
-            self?.lowPassCutoff = CoreFloat(convertToMidi($0.lowPassCutoff, from: state.lowPassCutoffRange))
-            self?.dryWetMix = CoreFloat(convertToMidi($0.dryWetMix, from: state.dryWetRange))
+            self?.delayTime = convertToCfMidi($0.delayTime, from: state.delayRange)
+            self?.feedback = convertToCfMidi($0.feedback, from: state.feedbackRange)
+            self?.lowPassCutoff = convertToCfMidi($0.lowPassCutoff, from: state.lowPassCutoffRange)
+            self?.dryWetMix = convertToCfMidi($0.dryWetMix, from: state.dryWetRange)
         }
     }
     
