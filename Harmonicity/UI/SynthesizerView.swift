@@ -54,7 +54,7 @@ struct SynthesizerView: View {
                 midiChannel: virtualMidiChannel,
                 commandCenter: context.commandCenter
             )
-//            .groupStyle(title: "", height: 150)
+            .groupStyle(title: "", height: 150)
         }
         .padding()        
     }
