@@ -7,7 +7,9 @@
 
 import Foundation
 
-final class PolyphonicVoice : CoreVoice {
+final class PolyphonicVoice: CoreVoice {
+    private static let log = logger(category: "PolyphonicVoice")
+    
     private let voices: [CoreMonoVoice]
     
     init(voices: [CoreMonoVoice]) {
@@ -40,7 +42,7 @@ final class PolyphonicVoice : CoreVoice {
             voice.noteOn(note)
             return
         }
-        print("[WARN] free voice not found")
+        Self.log.warning("free voice not found")
     }
     
     func noteOff(_ note: MidiNote) {

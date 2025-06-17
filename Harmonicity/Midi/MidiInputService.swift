@@ -14,6 +14,8 @@ enum MidiInputServiceError: Error {
 }
 
 final class MidiInputService {
+    private static let log = logger(category: "MidiInputService")
+    
     private var midiClient = MIDIClientRef()
     private var midiInputPort = MIDIPortRef()
     private let commandCenter: MidiCommandCenter
@@ -37,10 +39,10 @@ final class MidiInputService {
             let messageId = notification.pointee.messageID
             switch messageId {
             case .msgObjectAdded:
-                print("MIDI Object Added. Re-enumerating sources.")
+                Self.log.info("MIDI Object Added. Re-enumerating sources.")
                 self.findAndConnectMIDISources()
             case .msgObjectRemoved:
-                print("MIDI Object Removed. Re-enumerating sources.")
+                Self.log.info("MIDI Object Removed. Re-enumerating sources.")
                 self.findAndConnectMIDISources()
             default:
                 break
@@ -49,7 +51,6 @@ final class MidiInputService {
         guard status == noErr else {
             throw MidiInputServiceError.clientSetupFailed(status)
         }
-        print("MIDI Client created successfully.")
     }
     
     /// Sets up the CoreMIDI input port to receive messages.
@@ -64,13 +65,12 @@ final class MidiInputService {
         guard status == noErr else {
             throw MidiInputServiceError.inputPortSetupFailed(status)
         }
-        print("MIDI Input Port created successfully.")
     }
     
     /// Finds all available MIDI sources (e.g., keyboards) and connects them to the input port.
     private func findAndConnectMIDISources() {
         let numberOfSources = MIDIGetNumberOfSources()
-        print("Found \(numberOfSources) MIDI sources.")
+        Self.log.info("Found \(numberOfSources) MIDI sources.")
         
         for i in 0..<numberOfSources {
             let source = MIDIGetSource(i)
@@ -78,13 +78,13 @@ final class MidiInputService {
             let status = MIDIObjectGetStringProperty(source, kMIDIPropertyDisplayName, &displayName)
             
             if status == noErr, let name = displayName?.takeRetainedValue() {
-                print("Connecting to MIDI Source: \(name)")
+                Self.log.debug("Connecting to MIDI Source: \(name)")
                 let connectStatus = MIDIPortConnectSource(midiInputPort, source, nil)
                 if connectStatus != noErr {
-                    print("Error connecting to source \(name): \(connectStatus)")
+                    Self.log.error("Error connecting to source \(name): \(connectStatus)")
                 }
             } else {
-                print("Could not get display name for source \(i)")
+                Self.log.debug("Could not get display name for source \(i)")
             }
         }
     }
@@ -127,7 +127,7 @@ final class MidiInputService {
                     commandCenter.on(note: note, velocity: velocity, channel: channel)
                     i += 3 // Note On/Off messages are 3 bytes
                 } else {
-                    print("Incomplete Note On/Off message.")
+                    Self.log.warning("Incomplete Note On/Off message.")
                     i += 1 // Move to next byte to avoid infinite loop
                 }
             case 0x80: // Note Off (0x80-0x8F for channels 0-15)
@@ -137,7 +137,7 @@ final class MidiInputService {
                     commandCenter.off(note: note, velocity: velocity, channel: channel)
                     i += 3
                 } else {
-                    print("Incomplete Note Off message.")
+                    Self.log.warning("Incomplete Note Off message.")
                     i += 1
                 }
             case 0xB0: // Control Change (0xB0-0xBF for channels 0-15)
@@ -147,16 +147,16 @@ final class MidiInputService {
                     commandCenter.controlChange(control: controllerNumber, value: controllerValue, channel: channel)
                     i += 3
                 } else {
-                    print("Incomplete Control Change message.")
+                    Self.log.warning("Incomplete Control Change message.")
                     i += 1
                 }
             case 0xC0: // Program Change (0xC0-0xCF for channels 0-15)
                 if i + 1 < midiBytes.count {
                     let programNumber = midiBytes[i + 1]
-                    print("Program Change: Channel \(channel), Program \(programNumber)")
+                    Self.log.info("Program Change: Channel \(channel), Program \(programNumber)")
                     i += 2
                 } else {
-                    print("Incomplete Program Change message.")
+                    Self.log.warning("Incomplete Program Change message.")
                     i += 1
                 }
             case 0xE0: // Pitch Bend (0xE0-0xEF for channels 0-15)
@@ -164,10 +164,10 @@ final class MidiInputService {
                     let lsb = midiBytes[i + 1]
                     let msb = midiBytes[i + 2]
                     let pitchBendValue = (UInt16(msb) << 7) | UInt16(lsb) // Combine LSB and MSB
-                    print("Pitch Bend: Channel \(channel), Value \(pitchBendValue)")
+                    Self.log.info("Pitch Bend: Channel \(channel), Value \(pitchBendValue)")
                     i += 3
                 } else {
-                    print("Incomplete Pitch Bend message.")
+                    Self.log.warning("Incomplete Pitch Bend message.")
                     i += 1
                 }
             case 0xF0: // System Exclusive (SysEx) or other System Common Messages
@@ -180,18 +180,18 @@ final class MidiInputService {
                         j += 1
                     }
                     if j < midiBytes.count && midiBytes[j] == 0xF7 {
-                        print("SysEx Message: \(sysExData.map { String(format: "%02X", $0) }.joined(separator: " "))")
+                        Self.log.info("SysEx Message: \(sysExData.map { String(format: "%02X", $0) }.joined(separator: " "))")
                         i = j + 1 // Move past 0xF7
                     } else {
-                        print("Incomplete SysEx message (missing 0xF7).")
+                        Self.log.warning("Incomplete SysEx message (missing 0xF7).")
                         i += 1 // Move to next byte to avoid infinite loop
                     }
                 } else if statusByte == 0xF1 { // MIDI Time Code Quarter Frame
                     if i + 1 < midiBytes.count {
-                        print("MIDI Time Code Quarter Frame: \(midiBytes[i+1])")
+                        Self.log.info("MIDI Time Code Quarter Frame: \(midiBytes[i+1])")
                         i += 2
                     } else {
-                        print("Incomplete MIDI Time Code Quarter Frame.")
+                        Self.log.warning("Incomplete MIDI Time Code Quarter Frame.")
                         i += 1
                     }
                 } else if statusByte == 0xF2 { // Song Position Pointer
@@ -199,48 +199,48 @@ final class MidiInputService {
                         let lsb = midiBytes[i + 1]
                         let msb = midiBytes[i + 2]
                         let songPosition = (UInt16(msb) << 7) | UInt16(lsb)
-                        print("Song Position Pointer: \(songPosition)")
+                        Self.log.info("Song Position Pointer: \(songPosition)")
                         i += 3
                     } else {
-                        print("Incomplete Song Position Pointer.")
+                        Self.log.warning("Incomplete Song Position Pointer.")
                         i += 1
                     }
                 } else if statusByte == 0xF3 { // Song Select
                     if i + 1 < midiBytes.count {
-                        print("Song Select: \(midiBytes[i+1])")
+                        Self.log.info("Song Select: \(midiBytes[i+1])")
                         i += 2
                     } else {
-                        print("Incomplete Song Select.")
+                        Self.log.warning("Incomplete Song Select.")
                         i += 1
                     }
                 } else if statusByte == 0xF6 { // Tune Request
-                    print("Tune Request")
+                    Self.log.info("Tune Request")
                     i += 1
                 } else if statusByte == 0xF8 { // Timing Clock
-                    print("Timing Clock")
+                    Self.log.info("Timing Clock")
                     i += 1
                 } else if statusByte == 0xFA { // Start
-                    print("Start")
+                    Self.log.info("Start")
                     i += 1
                 } else if statusByte == 0xFB { // Continue
-                    print("Continue")
+                    Self.log.info("Continue")
                     i += 1
                 } else if statusByte == 0xFC { // Stop
-                    print("Stop")
+                    Self.log.info("Stop")
                     i += 1
                 } else if statusByte == 0xFE { // Active Sensing
-                    print("Active Sensing")
+                    Self.log.info("Active Sensing")
                     i += 1
                 } else if statusByte == 0xFF { // Reset
-                    print("Reset")
+                    Self.log.info("Reset")
                     i += 1
                 } else {
-                    print("Unknown System Common/Real-Time Message: \(String(format: "0x%02X", statusByte))")
+                    Self.log.warning("Unknown System Common/Real-Time Message: \(String(format: "0x%02X", statusByte))")
                     i += 1
                 }
             default:
                 // Handle unknown status bytes or running status
-                print("Unknown MIDI message or running status byte: \(String(format: "0x%02X", statusByte))")
+                Self.log.warning("Unknown MIDI message or running status byte: \(String(format: "0x%02X", statusByte))")
                 i += 1
             }
         }
@@ -250,6 +250,5 @@ final class MidiInputService {
     deinit {
         MIDIPortDispose(midiInputPort)
         MIDIClientDispose(midiClient)
-        print("MIDI Client and Port disposed.")
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import os
 
 @main
 struct HarmonicityApp: App {
@@ -60,4 +61,11 @@ struct HarmonicityApp: App {
             Text(error.localizedDescription)
         }
     }
+}
+
+func logger(category: String) -> Logger {
+    Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Harmonicity",
+        category: category
+    )
 }

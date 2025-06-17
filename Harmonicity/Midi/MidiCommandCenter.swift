@@ -9,6 +9,7 @@ import Combine
 import Foundation
 
 final class MidiCommandCenter {
+    private static let log = logger(category: "MidiCommandCenter")
     private let eventPublisher = PassthroughSubject<MidiCommand, Never>()
     
     var publisher: AnyPublisher<MidiCommand, Never> {
@@ -32,7 +33,7 @@ final class MidiCommandCenter {
     }
     
     func controlChange(control: MidiValue, value: MidiValue, channel: MidiChannel) {
-        print("ch: \(channel) ctrl: \(control) value: \(value)")
+        Self.log.info("ch: \(channel) ctrl: \(control) value: \(value)")
         let controlId = MidiControllerId(
             channel: channel,
             controller: control
