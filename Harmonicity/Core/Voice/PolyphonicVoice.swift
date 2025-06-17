@@ -15,11 +15,11 @@ final class PolyphonicVoice : CoreVoice {
     }
     
     var state: NoteState {
-        fatalError()
+        .idle
     }
     
     func canPlay(_ note: MidiNote) -> Bool {
-        fatalError()
+        voices.reduce(false) { $0 || $1.canPlay(note) }
     }
         
     func nextSample() -> CoreFloat {
