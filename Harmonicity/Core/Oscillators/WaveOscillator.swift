@@ -16,20 +16,26 @@ class WaveOscillator: Oscillator<WaveOscillator.Data> {
     
     private let sampleRate: CoreFloat
     private let waveForm: CoreWaveForm
+    private let phaseGenerator: PhaseGenerator
     
     // cache
     private let range: CoreRange
         
-    init(sampleRate: CoreFloat, waveForm: CoreWaveForm) {
+    init(
+        sampleRate: CoreFloat,
+        waveForm: CoreWaveForm,
+        phaseGenerator: PhaseGenerator
+    ) {
         self.sampleRate = sampleRate
         self.waveForm = waveForm
         self.range = waveForm.phaseRange()
+        self.phaseGenerator = phaseGenerator
         super.init(Data())
     }
     
     override func pendingParameters(_ frequency: CoreFloat) -> Data {
         Data(
-            phase: range.lowerBound,
+            phase: phaseGenerator.value(in: range),
             delta: range.length * frequency / sampleRate
         )
     }

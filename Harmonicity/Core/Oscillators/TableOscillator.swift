@@ -15,20 +15,26 @@ class TableOscillator: Oscillator<TableOscillator.Data> {
 
     private let sampleRate: CoreFloat
     private let table: [CoreFloat]
+    private let phaseGenerator: PhaseGenerator
     
     // cache
     private let size: CoreFloat
     
-    init(sampleRate: CoreFloat, table: [CoreFloat]) {
+    init(
+        sampleRate: CoreFloat,
+        table: [CoreFloat],
+        phaseGenerator: PhaseGenerator
+    ) {
         self.sampleRate = sampleRate
         self.table = table
         self.size = CoreFloat(table.count)
+        self.phaseGenerator = phaseGenerator
         super.init(Data())
     }
     
     override func pendingParameters(_ frequency: CoreFloat) -> Data {
         Data(
-            index: 0,
+            index: phaseGenerator.value(in: 0..<size),
             step: frequency * size / sampleRate
         )
     }

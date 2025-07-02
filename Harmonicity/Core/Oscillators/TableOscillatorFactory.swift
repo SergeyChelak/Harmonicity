@@ -10,15 +10,25 @@ import Foundation
 final class TableOscillatorFactory: CoreOscillatorFactory {
     private let sampleRate: CoreFloat
     private let tableSize: Int
+    private let phaseGenerator: PhaseGenerator
     
-    init(sampleRate: CoreFloat, tableSize: Int) {
+    init(
+        sampleRate: CoreFloat,
+        tableSize: Int,
+        phaseGenerator: PhaseGenerator
+    ) {
         self.sampleRate = sampleRate
         self.tableSize = tableSize
+        self.phaseGenerator = phaseGenerator
     }
     
     func oscillator(_ waveForm: any CoreWaveForm) -> any CoreOscillator {
         let table = makeTable(from: waveForm, tableSize)
-        return TableOscillator(sampleRate: sampleRate, table: table)
+        return TableOscillator(
+            sampleRate: sampleRate,
+            table: table,
+            phaseGenerator: phaseGenerator
+        )
     }
 }
 

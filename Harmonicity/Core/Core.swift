@@ -41,10 +41,6 @@ extension CoreWaveForm {
     }
 }
 
-protocol CoreOscillatorFactory {
-    func oscillator(_ waveForm: CoreWaveForm) -> CoreOscillator
-}
-
 protocol CoreVoice: CoreSampleSource, CoreMidiNoteHandler {
     var state: NoteState { get }
     func canPlay(_ note: MidiNote) -> Bool

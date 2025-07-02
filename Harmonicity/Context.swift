@@ -33,9 +33,9 @@ func composeContext() throws -> Context {
     let midiInput = MidiInputService(commandCenter)
     try midiInput.setup()
     
-    let factory = TableOscillatorFactory(
-        sampleRate: engine.sampleRate,
-        tableSize: 64
+    let factory = composeOscillatorFactory(
+        factoryType: .function,
+        sampleRate: engine.sampleRate
     )
     
     let config = Configuration(channel: virtualMidiChannel)
