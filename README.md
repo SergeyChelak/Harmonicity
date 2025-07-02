@@ -21,7 +21,14 @@ Harmonicity is a polyphonic synthesizer for macOS, crafted with SwiftUI and powe
 - Post-Processing Effects:
     * Delay: Add echoes and spacial depth to your sound.
     * Reverb: Create realistic room and hall simulations.
- 
+
+# Articles 
+I wrote a simplified blog/tutorial **Let’s craft your own synthesizer** based on this project. Here are the links
+- [Part 1](https://medium.com/@sergey.chelak/lets-craft-your-own-synthesizer-3c238612af8d)
+- [Part 2](https://medium.com/@sergey.chelak/lets-craft-your-own-synthesizer-part-2-541f09cf1edb)
+- [Part 3](https://medium.com/@sergey.chelak/lets-craft-your-own-synthesizer-part-3-cf8211c05b85)
+- [Part 4](https://medium.com/@sergey.chelak/lets-craft-your-own-synthesizer-part-4-ef00069098df)
+
 # Contributing
 
 Contributions are welcome! If you have suggestions for improvements, new features, or bug fixes, please open an issue or submit a pull request.
